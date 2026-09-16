@@ -1,1 +1,6 @@
 .DS_Store
+
+# Livrables produits par une exécution du skill
+donnees.json
+scan-avis-*.html
+scan-avis-*.md
