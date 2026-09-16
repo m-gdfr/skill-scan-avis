@@ -23,9 +23,8 @@ une réputation mais d'identifier des irritants exploitables, hiérarchisés et 
 | Fichier | Quand le lire |
 |---|---|
 | `SKILL.md` | La méthode : cadrage, collecte, qualification, scoring. À lire en entier avant de commencer. |
-| `references/livrable-md.md` | Au moment de rédiger le Markdown. Structure exacte du fichier. |
-| `references/livrable-html.md` | Au moment de construire la page HTML. Structure, ordre des blocs, contraintes. |
-| `assets/gabarit.html` | Gabarit fonctionnel à copier puis remplir. Rien à recoder. |
+| `references/rendu.md` | Au moment de produire les livrables. Schéma de `donnees.json`, mode allégé. |
+| `build.py` | Génère `.html` et `.md` à partir de `donnees.json`. Ne jamais ouvrir `assets/gabarit.html` : le script s'en charge seul. |
 
 ## Entrée
 
@@ -62,20 +61,38 @@ Privilégie la **recherche sémantique Exa** plutôt que des requêtes par mots-
 formulations d'irritants sont infiniment variables, la recherche sémantique les capte mieux. Construis
 les requêtes à partir du vocabulaire relevé en phase 1.
 
-### Garde-fous d'arrêt
+Appelle toujours `web_search_exa` avec **`numResults: 5`**. Chaque résultat ramène le texte complet
+de la page ; au-delà du cinquième, la pertinence sémantique décroche et tu paies du bruit au prix
+fort.
+
+### Budget de collecte
 
 La saturation thématique absolue est inatteignable sur une marque grand public — il y aura toujours un
-avis isolé mentionnant un irritant inédit. Trois règles bornent la collecte :
+avis isolé mentionnant un irritant inédit. La collecte est donc bornée par un budget, pas par
+l'épuisement.
+
+**10 recherches maximum pour l'ensemble du scan**, réparties ainsi :
+
+1. **Tour de chauffe.** Une passe large garantie sur chacune des sources activées en phase 1. C'est
+   le plancher : il protège l'exigence de recoupement sur au moins deux sources, qui est l'invariant
+   central de la qualification. Ne sacrifie jamais une source entière pour approfondir une autre.
+2. **Relances.** Le reliquat va aux sources qui ont produit des thèmes qualifiés au tour de chauffe,
+   par ordre de rendement décroissant : la source la plus riche reçoit la relance suivante. Une
+   relance est une requête ciblée sur un thème précis issu de ce que tu as déjà lu, jamais une
+   reformulation de la passe large.
+
+Deux règles d'arrêt encadrent la réallocation :
 
 - **Saturation qualifiée.** Un nouveau thème ne compte comme tel que s'il est mentionné par au moins
   deux avis. Une mention isolée est enregistrée en signal faible et n'ouvre pas de nouvelle piste
   de recherche.
-- **Fermeture par source.** Deux requêtes consécutives sans nouveau thème qualifié ferment la source.
-  Une source fermée ne se rouvre que si une piste précise émerge ailleurs et la concerne directement.
-- **Plafond de passes.** Trois passes maximum par source : une passe large, une passe ciblée sur les
-  thèmes issus de la première, une passe de vérification. Au-delà, la source est épuisée.
+- **Fermeture par source.** Une passe sans nouveau thème qualifié ferme la source : elle ne reçoit
+  plus de relance. Une source fermée ne se rouvre que si une piste précise émerge ailleurs et la
+  concerne directement.
 
-Le scan se clôt quand toutes les sources activées sont fermées.
+Le scan se clôt quand le budget est consommé ou quand toutes les sources activées sont fermées — le
+premier des deux. Un budget non consommé n'est pas un défaut : sur une marque peu exposée, cinq
+recherches suffisent souvent.
 
 ## Phase 3 — Qualification
 
@@ -92,6 +109,13 @@ Deux règles empruntées au recoupement journalistique :
   (campagne coordonnée probable).
 - Un avis détaillé et reproductible pèse plus qu'un reproche vague répété dix fois. Quand un irritant
   est factuel et vérifiable, va chercher la source primaire plutôt que d'accumuler des témoignages.
+
+**Vérification par source primaire.** C'est le seul moment où tu ouvres une page directement, avec
+`web_fetch_exa` et `maxCharacters: 1500`. Réserve-le aux irritants factuels qu'une page publique
+peut trancher — une hausse de tarif sur la page prix, une fonction retirée dans le changelog — et
+seulement quand la confirmation ferait basculer l'irritant de Probable à Confirmé. **Trois appels
+maximum par scan.** Vérifier un irritant déjà Confirmé par le volume, ou un ressenti qu'aucune page
+ne peut confirmer, ne sert à rien.
 
 Seuls les irritants **Confirmé** et **Probable** entrent dans le tableau priorisé. Les signaux faibles
 partent dans leur propre section — c'est souvent là que se trouvent les irritants émergents, ils ne
@@ -126,23 +150,22 @@ pseudo pour permettre de retrouver l'avis.
 
 ## Livrables
 
-Deux fichiers, produits systématiquement, jamais l'un sans l'autre :
+Deux fichiers, produits systématiquement, jamais l'un sans l'autre, à partir d'une seule source :
 
-1. **Le Markdown.** Destiné à la lecture machine et à la reprise par un autre agent. Structure exacte
-   dans `references/livrable-md.md`.
-2. **La page HTML.** Destinée à la lecture humaine — l'utilisateur pour son propre travail, ou un
-   client ou un supérieur en lecture autonome, sans commentaire oral d'accompagnement. Structure et
-   contraintes dans `references/livrable-html.md`, gabarit à copier dans
-   `assets/gabarit.html`.
+1. Remplis `donnees.json` selon le schéma de `references/rendu.md` — c'est le seul artefact que tu
+   écris à la main.
+2. Exécute `python3 build.py donnees.json`. Il génère `scan-avis-[marque-slug].html` (lecture
+   humaine) et `scan-avis-[marque-slug].md` (lecture machine) dans le même passage.
 
-Le Markdown reste la source de vérité du contenu : rédige-le d'abord, puis alimente la page HTML
-depuis lui. Les deux doivent porter exactement les mêmes chiffres.
+Comme les deux viennent de la même donnée, ils portent par construction les mêmes chiffres. N'ouvre
+et ne réécris jamais `assets/gabarit.html` toi-même.
 
 ### Cas de matière insuffisante
 
 Si aucun irritant n'atteint le niveau Probable — cas fréquent pour une PME ou une marque B2B peu
-exposée — les deux livrables passent en version allégée. Voir la section dédiée dans chacun des deux
-fichiers de référence. Dis explicitement que le volume d'avis disponibles ne permet pas de hiérarchiser.
+exposée — passe `mode_allege` à `true` dans `donnees.json` (voir `references/rendu.md`) : `build.py`
+retire lui-même les blocs cartes/tableau/légende/besoins/points forts des deux livrables. Dis
+explicitement que le volume d'avis disponibles ne permet pas de hiérarchiser.
 
 ## Ce qu'on évite
 

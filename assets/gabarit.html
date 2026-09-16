@@ -539,20 +539,21 @@ details.legend[open]>summary{border-bottom:1px solid var(--filet-doux)}
     </div>
   </div>
 
-  <!-- MODE ALLÉGÉ : si aucun irritant n'atteint Probable, supprime les cartes,
-       le tableau et la légende. Le constat, les signaux faibles et la méthode
-       restent. Voir references/livrable-html.md. -->
-
+  <!--@BLOC:TOP3-->
   <h2>Les trois irritants qui pèsent le plus</h2>
   <div class="cards" id="cards"></div>
+  <!--/@BLOC:TOP3-->
 
   <h2>Ce qui ressort</h2>
   <div class="constat">
+    <!--@CONSTAT-->
     <p>[Premier paragraphe : les irritants qui pèsent, et en quoi ils ne sont pas de même nature.]</p>
     <p>[Second paragraphe : là où ils se concentrent dans le parcours, et ce qui au contraire ne
     mobilise personne.]</p>
+    <!--/@CONSTAT-->
   </div>
 
+  <!--@BLOC:TABLE-->
   <h2>Tableau complet</h2>
   <div class="tools">
     <input type="search" id="q" placeholder="Rechercher un irritant ou un verbatim" aria-label="Rechercher">
@@ -588,28 +589,33 @@ details.legend[open]>summary{border-bottom:1px solid var(--filet-doux)}
       passe en signaux faibles et n'est pas priorisé.</p>
     </div>
   </details>
+  <!--/@BLOC:TABLE-->
 
   <h2>Le reste du scan</h2>
+  <!--@BLOC:BESOINS-->
   <details class="fold">
     <summary>Besoins exprimés</summary>
     <div class="fold-body">
-      <ul><li>[Demande explicite d'évolution.]</li><li>[…]</li></ul>
+      <ul><!--@BESOINS_LIST--><li>[Demande explicite d'évolution.]</li><li>[…]</li><!--/@BESOINS_LIST--></ul>
       <p class="legend-note">Un besoin est une demande explicite d'évolution. Il ne se confond pas
       avec un irritant : « le filtre ne marche pas » est un irritant, « il faudrait un filtre par
       date » est un besoin.</p>
     </div>
   </details>
+  <!--/@BLOC:BESOINS-->
+  <!--@BLOC:POINTSFORTS-->
   <details class="fold">
     <summary>Points forts à préserver</summary>
     <div class="fold-body">
-      <ul><li>[Ce que les utilisateurs défendent.]</li><li>[…]</li></ul>
-      <p>[Ce qu'une correction ne doit pas casser.]</p>
+      <ul><!--@POINTSFORTS_LIST--><li>[Ce que les utilisateurs défendent.]</li><li>[…]</li><!--/@POINTSFORTS_LIST--></ul>
+      <p><!--@POINTSFORTS_NOTE-->[Ce qu'une correction ne doit pas casser.]<!--/@POINTSFORTS_NOTE--></p>
     </div>
   </details>
+  <!--/@BLOC:POINTSFORTS-->
   <details class="fold">
     <summary>Signaux faibles</summary>
     <div class="fold-body">
-      <ul><li>[Irritant sous le seuil de fiabilité, avec son volume.]</li><li>[…]</li></ul>
+      <ul><!--@SIGNAUX_LIST--><li>[Irritant sous le seuil de fiabilité, avec son volume.]</li><li>[…]</li><!--/@SIGNAUX_LIST--></ul>
       <p>Sous le seuil de fiabilité, donc hors tableau. C'est souvent là que se trouvent les
       irritants émergents : à revérifier au prochain scan plutôt qu'à écarter.</p>
     </div>
@@ -617,11 +623,11 @@ details.legend[open]>summary{border-bottom:1px solid var(--filet-doux)}
   <details class="fold">
     <summary>Méthode et limites</summary>
     <div class="fold-body">
-      <p>[Périmètre retenu : langue et géographie. Puis : sources activées, sources écartées et pourquoi, nombre de passes par source, requêtes menées.]</p>
+      <p><!--@METHODE_INTRO-->[Périmètre retenu : langue et géographie. Puis : sources activées, sources écartées et pourquoi, nombre de passes par source, requêtes menées.]<!--/@METHODE_INTRO--></p>
       <p>Les avis en ligne surreprésentent les extrêmes. Les chiffres de ce document ne sont pas des
       statistiques représentatives de la base utilisateurs : ils mesurent ce qui se dit, pas ce qui
       se vit. Un irritant très gênant mais silencieux n'apparaît pas ici.</p>
-      <p>[Ce que le scan ne dit pas.]</p>
+      <p><!--@METHODE_LIMITES-->[Ce que le scan ne dit pas.]<!--/@METHODE_LIMITES--></p>
     </div>
   </details>
 
@@ -649,14 +655,18 @@ details.legend[open]>summary{border-bottom:1px solid var(--filet-doux)}
 
    Le score est calculé, ne le saisis pas. L'ordre de D n'importe pas.
    ============================================================ */
+/*@DATA:SOURCES*/
 const SOURCES = ["Trustpilot", "Reddit", "App Store"];
+/*/@DATA:SOURCES*/
 
+/*@DATA:D*/
 const D = [
   {nom:"[Irritant]", freq:0, grav:4, fiab:"Confirmé", verbatims:[
     {fragment:"fragment court", source:"Trustpilot, JJ/MM, @pseudo", url:"https://"},
     {fragment:"fragment court", source:"Reddit, JJ/MM, @pseudo", url:"https://"}
   ]}
 ];
+/*/@DATA:D*/
 
 /* ===== À partir d'ici, rien à modifier ===== */
 
@@ -727,6 +737,7 @@ const normSource = n => n.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().
     '</span><span class="sources-count" aria-hidden="true">' + n + (n>1 ? " sources" : " source") + '</span>';
 })();
 
+/*@JS:TOP3*/
 /* ===== cartes du top 3 =====
    Trois choses seulement : le titre, la ligne fréquence · gravité, le repli
    des verbatims. Le score et la fiabilité restent au tableau, qui a ses
@@ -743,7 +754,9 @@ document.getElementById("cards").innerHTML =
       '<details class="verb"><summary>'+n+(n>1?" verbatims":" verbatim")+'</summary>'+
       verbs(d)+'</details></div>';
   }).join("");
+/*/@JS:TOP3*/
 
+/*@JS:TABLE*/
 /* ===== menu déroulant maison =====
    Remplace <select>, dont Safari ignore la police et le radius sur la boîte
    fermée quel que soit le reset d'appearance appliqué. Clavier complet :
@@ -864,6 +877,7 @@ dropdown("dd-fiab", "Fiabilité", [
 ], v => { fiabFilter = v; render(); });
 
 render();
+/*/@JS:TABLE*/
 </script>
 </body>
 </html>
