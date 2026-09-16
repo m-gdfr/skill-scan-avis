@@ -1,0 +1,79 @@
+{
+  "marque": "Foodly",
+  "date_scan": "16/09/2026",
+  "perimetre": "France, avis francophones",
+  "avis_exploitables": 63,
+  "sources": ["Trustpilot", "Reddit", "App Store"],
+  "mode_allege": false,
+
+  "constat": [
+    "Les remboursements tardifs et les erreurs de livraison dominent largement les retours récents : ce sont les deux seuls irritants qui font parler de résiliation. Le reste des critiques reste au niveau de la friction ponctuelle.",
+    "Ces irritants se concentrent presque tous sur l'étape post-commande (livraison, SAV) ; l'étape de commande elle-même, souvent citée en points forts, ne mobilise aucune critique qualifiée."
+  ],
+
+  "irritants": [
+    {
+      "nom": "Remboursement après commande annulée",
+      "freq": 9,
+      "grav": 4,
+      "fiab": "Confirmé",
+      "verbatims": [
+        {"fragment": "remboursée au bout de 3 semaines", "source": "Trustpilot, 12/03, @claire_m", "url": "https://fr.trustpilot.com/review/foodly.example/1"},
+        {"fragment": "j'ai résilié, plus jamais", "source": "Reddit, 04/05, @rlx_92", "url": "https://reddit.com/r/foodly/comments/example1"}
+      ]
+    },
+    {
+      "nom": "Livreur qui n'arrive jamais à destination",
+      "freq": 7,
+      "grav": 3,
+      "fiab": "Confirmé",
+      "verbatims": [
+        {"fragment": "livré chez le voisin sans prévenir", "source": "App Store, 22/04, @foodlyfan", "url": "https://apps.apple.com/fr/app/foodly/id0000000000?see-all=reviews"},
+        {"fragment": "deux fois cette semaine, colis introuvable", "source": "Trustpilot, 30/04, @julien.b", "url": "https://fr.trustpilot.com/review/foodly.example/2"}
+      ]
+    },
+    {
+      "nom": "Support client injoignable",
+      "freq": 6,
+      "grav": 3,
+      "fiab": "Probable",
+      "verbatims": [
+        {"fragment": "chatbot en boucle, jamais d'humain", "source": "Reddit, 18/02, @sofoodie", "url": "https://reddit.com/r/foodly/comments/example2"},
+        {"fragment": "aucune réponse au bout d'une semaine", "source": "Trustpilot, 09/06, @m.dupont", "url": "https://fr.trustpilot.com/review/foodly.example/3"}
+      ]
+    },
+    {
+      "nom": "Application qui plante au paiement",
+      "freq": 5,
+      "grav": 2,
+      "fiab": "Probable",
+      "verbatims": [
+        {"fragment": "crash juste avant de valider la commande", "source": "App Store, 03/07, @theo_p", "url": "https://apps.apple.com/fr/app/foodly/id0000000000?see-all=reviews"},
+        {"fragment": "obligé de recommencer trois fois", "source": "Reddit, 11/07, @paulinef", "url": "https://reddit.com/r/foodly/comments/example3"}
+      ]
+    }
+  ],
+
+  "besoins": [
+    "Pouvoir suivre le livreur en direct sur une carte, pas seulement un statut texte.",
+    "Ajouter un bouton d'annulation avec remboursement immédiat plutôt qu'un ticket support."
+  ],
+
+  "points_forts": {
+    "items": [
+      "Le choix de restaurants est jugé bien supérieur aux concurrents dans les grandes villes.",
+      "L'étape de commande (recherche, filtres, panier) est citée comme rapide et sans friction."
+    ],
+    "note": "Une correction du parcours post-commande ne doit pas alourdir le tunnel de commande, qui est aujourd'hui le point le mieux noté du produit."
+  },
+
+  "signaux_faibles": [
+    "Deux avis isolés mentionnent une hausse des frais de livraison en zone rurale.",
+    "Un avis Reddit évoque des notifications push envoyées après l'heure de livraison annoncée."
+  ],
+
+  "methode": {
+    "intro": "Périmètre : avis francophones, France, 12 derniers mois. Sources activées : Trustpilot, Reddit, App Store — fermées après deux passes sans nouveau thème qualifié. Google Play écarté : aucun avis francophone récent au-delà de la note moyenne. Requêtes menées à partir du vocabulaire relevé en phase 1 (remboursement, livreur, support, crash paiement).",
+    "limites": "Le scan ne dit rien du volume réel de commandes ni du taux d'incidents rapporté à l'ensemble des livraisons : il mesure ce qui est écrit, pas ce qui est vécu en silence."
+  }
+}
