@@ -9,7 +9,7 @@ Il produit systématiquement **deux livrables** :
 Le skill se déclenche via `/scan-avis` ou toute intention naturelle d'analyse produit à partir d'avis
 ("que disent les utilisateurs de X", "les irritants de X"...). 
 
-Méthode complète dans [skill-scan-avis/SKILL.md](skill-scan-avis/SKILL.md).
+Méthode complète dans [SKILL.md](SKILL.md).
 
 ## Téléchargement
 
