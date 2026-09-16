@@ -5,60 +5,186 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scan avis — [MARQUE]</title>
 <style>
+/* ============================================================
+   Identité visuelle : copie conforme de components/rapport.css
+   (dépôt scan-avis-web). Invariable d'un scan à l'autre, ne la
+   retouche pas par scan. Pour resynchroniser : recopier le
+   fichier tel quel entre les balises <style>.
+   ============================================================ */
 :root{
-  /* ===== Tokens Cosmos ===== */
-  --color-linen-canvas:#f7f5f3; --color-ink-black:#0d0d0d; --color-paper-white:#ffffff;
-  --color-stone:#6e6a69; --color-pebble:#9a9796;
+  /* ===== Tokens Hearth =====
+     Les noms disent le rôle, pas la teinte : ils viennent du système précédent
+     et restent justes une fois les valeurs remplacées.
 
-  /* Police : sans-serif demandée, remplace le serif cosmosOracle */
-  --font-cosmosoracle:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+     Contrastes. Le rapport n'a que quatre fonds : parchemin (la page), blanc
+     (les cartes et les lignes du tableau), lavis (une ligne ouverte, un puits
+     de verbatims) et encre (la seule pastille pleine, .tag.ok). Chaque couleur
+     de texte ou de signe est donc recalculée contre ces quatre fonds une fois
+     ici, à sa déclaration, plutôt que répétée à chacun de ses emplois.
+     Plancher : 4,5:1 pour du texte, 3:1 pour un signe ou un contour.
 
-  --text-caption:14px; --leading-caption:1.5;
-  --text-body:16px; --leading-body:1.5; --tracking-body:-0.18px;
-  --text-subheading:18px; --leading-subheading:1.29; --tracking-subheading:-0.2px;
-  --text-heading-sm:24px; --leading-heading-sm:1.2; --tracking-heading-sm:-0.48px;
-  --text-heading:33px; --leading-heading:1.1; --tracking-heading:-1.32px;
-  --text-heading-lg:38px; --leading-heading-lg:1.08; --tracking-heading-lg:-1.52px;
-  --text-display:58px; --leading-display:1.06; --tracking-display:-2.32px;
+                     parchemin   blanc   lavis   encre
+       encre            15,80    16,48   15,00      .
+       pierre            8,14     8,49    7,72      .
+       galet             4,98     5,20    4,73      .
+       parchemin            .     1,04    1,05   15,80
+       gravité 4        14,72    15,36   13,97      .
+       gravité 3         6,28     6,55    5,96      .
+       gravité 2         4,32     4,51    4,10      .
+       gravité 1         3,29     3,44    3,13      .
+       filet net         4,00     4,18       .      .
+       ember             3,21     3,34    3,04    4,93
 
-  --w-350:350; --w-regular:400; --w-medium:500;
+     Les emplois dont le fond n'est pas le fond courant du bloc portent quand
+     même leur ratio en commentaire, à la déclaration concernée.
 
-  --spacing-4:4px; --spacing-8:8px; --spacing-16:16px; --spacing-20:20px; --spacing-24:24px;
-  --spacing-32:32px; --spacing-40:40px; --spacing-48:48px; --spacing-72:72px;
+     Ember, l'accent de marque. Sous 4,5:1 sur les trois fonds clairs, donc
+     jamais du texte : ni un lien, ni un libellé, ni le petit texte d'un
+     eyebrow. Réservé à des signes de la taille d'une icône (plancher 3:1),
+     et seulement là où il ne peut pas se lire comme un niveau de gravité.
+     La rampe --grav-* garde le monopole de la couleur qui signifie quelque
+     chose : ember ne porte jamais de valeur, seulement une identité de
+     marque ou l'état actif d'un contrôle générique, et jamais au même
+     endroit qu'une pastille de gravité. Sur encre il tient 4,93:1, donc le
+     plancher texte aussi, au cas où un usage sur fond sombre se présente
+     plus tard : aucun n'existe aujourd'hui dans ce fichier. */
 
-  --page-max-width:1280px; --section-gap:80px; --card-padding:16px; --element-gap:24px;
-  --radius:16px;
+  --color-linen-canvas:#fffaeb;   /* parchemin, fond de page */
+  --color-paper-white:#ffffff;    /* blanc de carte : 1,04:1 sur le parchemin, c'est le filet et l'ombre qui dessinent le bord */
+  /* Lavis : le blanc de carte chargé de 7% d'olive-gold, la teinte des ombres.
+     Il marque une ligne survolée, une ligne ouverte et un puits de verbatims.
+     1,10:1 sur le blanc, 1,05:1 sur le parchemin : c'est un voile, pas un
+     contraste, et c'est voulu. Un aplat franc à cet endroit tire l'œil plus
+     que les citations qu'il porte. */
+  --color-wash:#f6f4ef;
+  /* Beurre : réservé à l'état actif d'un contrôle, donc à l'option choisie du
+     menu déroulant, et à rien d'autre. Encre par-dessus : 14,52:1. */
+  --color-soft-butter:#fff0c2;
+  --color-ink-black:#1f1f1f;      /* texte principal */
+  --color-carbon:#000000;         /* seul remplissage de bouton, 20,13:1 sous le parchemin du libellé */
+  --color-stone:#524c43;          /* texte courant, « pierre » dans le tableau ci-dessus */
+  --color-pebble:#786b57;         /* texte tertiaire, « galet » dans le tableau ci-dessus */
+  /* Accent de marque, non signifiant. Voir la note plus haut : jamais du
+     texte, jamais au même endroit qu'une pastille de --grav-*. */
+  --color-ember:#fa520f;
 
-  --ink-10:rgba(13,13,13,.1); --ink-22:rgba(13,13,13,.22);
+  /* Police : Arial, imposée par Hearth, présente sur toutes les plateformes.
+     Rien n'est chargé depuis un CDN. Poids 400 exclusivement. */
+  --font-arial:Arial,Helvetica,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 
-  /* Seule couleur chromatique de la page, réservée à la gravité, pour la lisibilité —
-     dégradé rouge (4, churn) → rose sourd (1, cosmétique), tons volontairement sombres */
-  --grav-4:#7d2b34; --grav-3:#a5424a; --grav-2:#c06e73; --grav-1:#dba7ab;
+  /* Échelle Hearth : 14 / 16 / 24 / 32 / 38 / 48 / 56.
+     Tracking unique -0.025em à toutes les tailles, posé une fois sur body. */
+  --text-caption:14px; --leading-caption:1.43;
+  --text-body:16px; --leading-body:1.5;
+  --text-subheading:24px; --leading-subheading:1.33;
+  --text-heading-sm:32px; --leading-heading-sm:1.15;
+  --text-heading:38px; --leading-heading:1.05;
+  --text-heading-lg:48px; --leading-heading-lg:1.05;
+  --text-display:56px; --leading-display:1;
+  --tracking:-0.025em;
+
+  /* Un seul poids. La hiérarchie vient de la taille, de la couleur et de l'espacement. */
+  --w-regular:400;
+
+  --spacing-4:4px; --spacing-8:8px; --spacing-12:12px; --spacing-16:16px; --spacing-20:20px;
+  --spacing-24:24px; --spacing-32:32px; --spacing-40:40px; --spacing-48:48px; --spacing-72:72px;
+
+  --page-max-width:1200px; --section-gap:80px; --card-padding:24px; --element-gap:24px;
+
+  /* Rayons distincts par famille d'objet, comme chez Hearth. */
+  --radius-carte:12px; --radius-champ:8px; --radius-bouton:6px; --radius-pill:9999px;
+
+  /* Filets. Aucun gris froid : la teinte chaude miel remplace l'ancien noir transparent.
+     Le filet doux est décoratif (séparateur interne, bord de carte doublé d'une ombre).
+     Le filet net borne un contrôle et doit donc tenir le 3:1 : 4,00:1 sur parchemin,
+     4,18:1 sur blanc. */
+  --filet-doux:#ecdaa2;
+  --filet-net:#8a7a5e;
+
+  /* Ombres teintées olive-gold. Deux couches seulement : ces blocs sont posés
+     sur le parchemin, ils ne flottent pas. La pile xl à quatre couches de
+     Hearth est faite pour un hero, elle ne sert nulle part ici. */
+  --ombre-carte:0 1px 2px rgba(127,99,21,.10), 0 4px 12px rgba(127,99,21,.07);
+
+  /* ===== Échelle de gravité =====
+     Seule famille chromatique de la page : la couleur ne dit que la gravité.
+     Dégradé chaud aligné sur l'ember, du brûlé sombre (4, churn) à l'ocre miel
+     (1, mineur). L'ordre tient en luminance seule, donc il reste lisible en
+     daltonisme, et le plancher 3:1 tient sur les quatre fonds où une pastille
+     se pose réellement : parchemin, blanc, lavis, beurre. Le minimum est de
+     3,03:1, sur le beurre, qui est le plus sombre des quatre et donc le fond
+     contraignant.
+
+     Les écarts en clarté perceptuelle (CIE L*) comptent davantage que les
+     ratios WCAG, qui ne sont pas perceptuellement uniformes : c'est l'écart
+     entre les deux qui avait fait se confondre les paliers 4 et 3.
+       L* :      14,6   39,6   49,8   57,6     donc des marches de 25 / 10 / 8
+       teinte :    6°    21°    17°    41°
+     Chaque couple voisin bouge sur au moins un des deux axes, et le couple
+     4 / 3, le plus difficile parce que deux signes sombres se ressemblent à
+     petite taille, bouge sur les deux : 25 points de clarté et 15° de teinte.
+     Le haut de la rampe est contraint par le plancher 3:1, qui interdit de
+     dépasser L* 58 : c'est le palier 4, libre de descendre, qui a donc absorbé
+     l'écart. */
+  --grav-4:#4f0800; /* 14,72:1 parchemin, 15,36:1 blanc, 13,97:1 lavis, 13,53:1 beurre */
+  --grav-3:#a53a00; /*  6,28:1 parchemin,  6,55:1 blanc,  5,96:1 lavis,  5,77:1 beurre */
+  --grav-2:#d4450c; /*  4,32:1 parchemin,  4,51:1 blanc,  4,10:1 lavis,  3,97:1 beurre */
+  --grav-1:#b08320; /*  3,29:1 parchemin,  3,44:1 blanc,  3,13:1 lavis,  3,03:1 beurre */
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0; background:var(--color-linen-canvas); color:var(--color-ink-black);
-  font-family:var(--font-cosmosoracle); font-weight:var(--w-regular);
-  font-size:var(--text-body); line-height:var(--leading-body); letter-spacing:var(--tracking-body)}
+  font-family:var(--font-arial); font-weight:var(--w-regular);
+  font-size:var(--text-body); line-height:var(--leading-body); letter-spacing:var(--tracking)}
 .wrap{max-width:var(--page-max-width); margin:0 auto; padding:var(--spacing-72) var(--spacing-24) 140px}
 .col{max-width:720px}
 h1,h2,h3,p,ul{margin:0}
-a{color:var(--color-ink-black); text-decoration:none; border-bottom:1px solid var(--ink-22)}
+/* Poids 400 partout, y compris là où le navigateur met du gras d'office :
+   titres, b, strong, th, summary. C'est la taille, la couleur et l'espacement
+   qui portent la hiérarchie, jamais la graisse. */
+h1,h2,h3,h4,b,strong,th,summary{font-weight:var(--w-regular)}
+a{color:var(--color-ink-black); text-decoration:none; border-bottom:1px solid var(--filet-net)}
 a:hover{border-bottom-color:var(--color-ink-black)}
-:focus-visible{outline:1.5px solid var(--color-ink-black); outline-offset:2px; border-radius:2px}
+:focus-visible{outline:1.5px solid var(--color-ink-black); /* 15,80:1 sur parchemin, 16,48:1 sur blanc */
+  outline-offset:2px; border-radius:2px}
 
-.brandmark{display:flex; align-items:center; gap:10px; margin-bottom:var(--spacing-16)}
+/* ===== en-tête : logo à droite de l'écran, pas à droite de la colonne de
+   prose. .head-row est un enfant direct de .wrap (1200px), pas de .col
+   (720px) : le brandmark peut donc atteindre le même bord droit que .cards,
+   au lieu de s'arrêter au milieu de la page. Le h1 garde sa largeur de
+   colonne par son propre max-width (20ch, sous .col), pas par un conteneur
+   parent. flex:1 sur le titre, flex:none sur la marque, qui garde sa taille.
+
+   Alignement : centré, pas sur la ligne de base. La ligne de base était
+   correcte au sens CSS, mais entre un h1 à 48px et un eyebrow à 14px, elle ne
+   se lit pas comme un même bloc : le nom de marque occupe toute la hauteur de
+   la ligne pendant que le petit logo reste collé à son pied, avec un grand
+   vide au-dessus qui le fait paraître posé là plutôt qu'aligné. Le centrage
+   vertical met le milieu du logo au milieu du h1 : les deux occupent la même
+   bande horizontale, quelle que soit la marque. C'est aussi plus robuste,
+   .brandmark est lui-même un conteneur flex imbriqué et certains moteurs
+   synthétisent sa ligne de base au bord bas plutôt qu'au texte, ce qui
+   pouvait aggraver l'effet de logo décroché en haut du bloc. Le repli mobile
+   sous 700px fixe déjà son propre align-items:flex-start plus bas, cette
+   règle ne le concerne pas. */
+.head-row{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-16)}
+.head-row h1{flex:1 1 auto; min-width:0}
+.brandmark{display:flex; align-items:center; gap:10px; flex:none}
 .dots{display:grid; grid-template-columns:repeat(3,4px); grid-template-rows:repeat(3,4px); gap:2px}
 .dots i{width:4px; height:4px; border-radius:50%; background:var(--color-ink-black)}
 .dots i:nth-child(5){background:transparent}
-.eyebrow{font-size:15px; font-weight:var(--w-medium); letter-spacing:0; text-transform:uppercase;
+/* seul point de marque : la marque de fabrique de la page, sans rapport avec
+   les données. 3,21:1 sur parchemin, un signe tient le plancher 3:1. */
+.dots i:nth-child(2){background:var(--color-ember)}
+/* eyebrow : sans gras, ce sont les capitales et l'interlettrage positif qui
+   séparent l'étiquette de marque du texte courant. */
+.eyebrow{font-size:var(--text-caption); letter-spacing:.08em; text-transform:uppercase;
   color:var(--color-ink-black)}
 
 h1{font-size:var(--text-heading-lg); line-height:var(--leading-heading-lg);
-  letter-spacing:var(--tracking-heading-lg); font-weight:var(--w-350); max-width:20ch}
+  max-width:20ch}
 h2{font-size:var(--text-heading-sm); line-height:var(--leading-heading-sm);
-  letter-spacing:var(--tracking-heading-sm); font-weight:var(--w-350); color:var(--color-ink-black);
-  margin:var(--section-gap) 0 var(--spacing-24)}
+  color:var(--color-ink-black); margin:var(--section-gap) 0 var(--spacing-24)}
 p{max-width:66ch; margin:0 0 var(--spacing-16); color:var(--color-stone)}
 
 details[open]>.fold-body,details[open]>.verbs,tr.det.show td>.verbs{
@@ -66,40 +192,97 @@ details[open]>.fold-body,details[open]>.verbs,tr.det.show td>.verbs{
 @keyframes reveal{from{opacity:0; transform:translateY(-3px)} to{opacity:1; transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:1ms!important; transition-duration:1ms!important}}
 
-.cadrage{display:flex; flex-wrap:wrap; gap:var(--spacing-4) var(--spacing-24);
-  margin-top:var(--spacing-16); font-size:var(--text-caption); letter-spacing:0; color:var(--color-pebble)}
-.cadrage b{color:var(--color-ink-black); font-weight:var(--w-medium); font-variant-numeric:tabular-nums}
+/* cadrage : un second bloc, distinct du bloc d'entête (h1 + logo), pas sa
+   suite. La séparation entre les deux passe par le rythme, pas par un filet :
+   l'écart au-dessus de la pile (32px) est quatre fois l'écart entre ses
+   propres rangées (8px), donc l'oeil groupe les trois lignes de métadonnées
+   entre elles et les détache du bloc du dessus, sans trait ajouté. Les trois
+   items (date + fenêtre, avis exploitables, bulle sources) sont des rangées
+   d'une pile, alignées à gauche sous le h1 comme le reste du texte de .col.
+   L'étiquette de « avis exploitables » reste en toutes lettres à côté de son
+   picto, la couleur (tertiaire pour le libellé, encre pour la valeur) porte
+   toujours l'écart, 4,98:1 contre 15,80:1 sur parchemin. */
+.cadrage{display:flex; flex-direction:column; align-items:flex-start; gap:var(--spacing-8);
+  margin-top:var(--spacing-32); font-size:var(--text-caption); color:var(--color-pebble)}
+.cadrage b{color:var(--color-ink-black); font-weight:var(--w-regular); font-variant-numeric:tabular-nums}
+/* date, fenêtre, avis : le picto remplace le libellé en toutes lettres pour
+   la date et la fenêtre, réunies dans un seul item séparé par une puce
+   médiane. Le sens pour les lecteurs d'écran est repris par l'aria-label du
+   conteneur plutôt que par le texte visible, donc le picto et la valeur
+   visible sont tous deux masqués (aria-hidden), pour ne pas annoncer deux
+   fois la même chose. « Avis exploitables » garde son texte, le picto n'y
+   est que décoratif, donc pas d'aria-label ajouté sur cet item : le texte
+   visible suffit déjà à l'accessibilité. */
+.cadrage-item{display:inline-flex; align-items:center; gap:8px}
+.picto{width:15px; height:15px; flex:none; color:var(--color-pebble)} /* 4,98:1 sur parchemin, signe : plancher 3:1 */
 
-/* ===== constat — texte nu sur le canvas, plus de carte : trop répétitif à côté
+/* ===== bulle sources, esprit Perplexity =====
+   Fond encre (seule autre pastille pleine du rapport avec .tag.ok, donc pas
+   une troisième autorité de couleur) : 15,80:1 pour le texte parchemin, déjà
+   documenté au tableau de tête de fichier. Favicons maison (voir le
+   commentaire de SOURCE_ICONS dans Rapport.tsx pour l'arbitrage réseau contre
+   jeu embarqué), cerclés du même encre que le fond de la bulle pour détacher
+   le chevauchement sans dessiner de contour visible sur la bulle elle-même. */
+.sources-pill{display:inline-flex; align-items:center; gap:8px;
+  background:var(--color-ink-black); color:var(--color-linen-canvas);
+  border-radius:var(--radius-pill); padding:4px 12px 4px 4px}
+.sources-avatars{display:flex}
+/* rond de secours à .18 d'opacité sur l'encre : 9,03:1 pour l'icône parchemin,
+   largement au-dessus du plancher 3:1 d'un signe */
+.source-avatar{display:flex; align-items:center; justify-content:center;
+  width:20px; height:20px; border-radius:50%; flex:none;
+  background:rgba(255,250,235,.18); color:var(--color-linen-canvas);
+  border:2px solid var(--color-ink-black); margin-left:-8px}
+.source-avatar:first-child{margin-left:0}
+.source-avatar svg{width:13px; height:13px; display:block}
+.sources-count{font-size:var(--text-caption); white-space:nowrap}
+
+/* ===== constat, texte nu sur le canvas, plus de carte : trop répétitif à côté
    des autres blocs déjà encartés ===== */
 .constat p{font-size:var(--text-subheading); line-height:var(--leading-subheading);
-  letter-spacing:var(--tracking-subheading); color:var(--color-stone); max-width:64ch}
+  color:var(--color-stone); max-width:64ch}
 .constat p:last-child{margin:0}
 
-/* ===== top 3 ===== */
-.cards{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--element-gap)}
-.card{background:var(--color-paper-white); border-radius:var(--radius); padding:var(--card-padding);
+/* ===== top 3 =====
+   align-items:start : chaque carte fait sa propre hauteur. Sans cela la grille
+   les étire à la hauteur de la rangée, et déplier les verbatims de l'une
+   allongeait les trois, les deux autres se retrouvant avec un trou au milieu.
+   L'égalité de hauteur entre cartes fermées est reprise plus bas, par la
+   hauteur réservée au titre. */
+.cards{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--element-gap);
+  align-items:start}
+/* La carte ne porte plus que trois choses : le titre de l'irritant, la ligne de
+   métadonnées et le repli des verbatims. Le score et l'étiquette de fiabilité
+   en ont été retirés : hors du tableau, qui a ses colonnes et sa légende, ces
+   deux indicateurs n'ont rien qui explique ce qu'ils valent. La carte n'a donc
+   plus de bande haute, et le titre est le premier élément. */
+.card{background:var(--color-paper-white); border:1px solid var(--filet-doux);
+  border-radius:var(--radius-carte); box-shadow:var(--ombre-carte); padding:var(--card-padding);
   display:flex; flex-direction:column}
-/* score : simple hiérarchie typographique, plus de bulle */
-.score-line{display:flex; align-items:baseline; gap:6px; margin-bottom:var(--spacing-8)}
-.score-line b{font-size:32px; font-weight:var(--w-medium); line-height:1; color:var(--color-ink-black);
-  font-variant-numeric:tabular-nums}
-.score-line span{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--color-pebble)}
-.card h3{font-size:var(--text-subheading); line-height:1.35; letter-spacing:var(--tracking-subheading);
-  font-weight:var(--w-regular); color:var(--color-ink-black)}
+/* Le titre réserve la hauteur de trois lignes, la longueur du plus long libellé
+   d'irritant observé. Les cartes fermées s'égalisent donc d'elles-mêmes, et ce
+   qui les suit s'aligne d'une carte à l'autre, sans que la grille ait à les
+   étirer. Ce que ça coûte : trois titres courts laissent du blanc sous eux, et
+   un titre de quatre lignes fait redescendre le pied de sa seule carte. */
+.card h3{font-size:var(--text-subheading); line-height:1.25; font-weight:var(--w-regular);
+  color:var(--color-ink-black); min-height:calc(1.25em * 3)}
 .meta-row{display:flex; align-items:center; flex-wrap:wrap; gap:var(--spacing-8); margin-top:var(--spacing-16)}
 .metric{font-size:var(--text-caption); color:var(--color-stone); display:inline-flex; align-items:center; gap:6px}
-.metric b{font-weight:var(--w-medium); color:var(--color-ink-black); font-variant-numeric:tabular-nums}
+.metric b{font-weight:var(--w-regular); color:var(--color-ink-black); font-variant-numeric:tabular-nums}
 .metrics-sep{color:var(--color-pebble)}
-/* gravité : plus de chiffre, seulement le nom et la bulle colorée */
+/* gravité : plus de chiffre, seulement le nom et la pastille colorée.
+   12px et non 9 : à 9px l'œil moyenne la pastille en une tache et n'y lit plus
+   la teinte, seulement la clarté. Les 3px gagnés rendent la teinte lisible, et
+   c'est elle qui sépare deux paliers voisins une fois la clarté épuisée. */
 .grav{display:inline-flex; align-items:center; gap:6px}
-.grav b{width:9px; height:9px; border-radius:50%; flex:none; display:inline-block}
-.grav i{font-style:normal; color:var(--color-ink-black); font-weight:var(--w-medium)}
-.tag{font-size:var(--text-caption); border-radius:var(--radius); padding:4px 12px}
-.tag.ok{background:var(--color-ink-black); color:var(--color-paper-white)}
-.tag.mid{background:var(--color-paper-white); color:var(--color-stone); border:1px solid var(--ink-22)}
-.verb{margin-top:var(--spacing-16); border-top:1px solid var(--ink-10); padding-top:var(--spacing-8)}
-.verb>summary{list-style:none; cursor:pointer; font-size:var(--text-caption); font-weight:var(--w-medium);
+.grav b{width:12px; height:12px; border-radius:50%; flex:none; display:inline-block}
+.grav i{font-style:normal; color:var(--color-ink-black); font-weight:var(--w-regular)}
+.tag{font-size:var(--text-caption); border-radius:var(--radius-pill); padding:4px 12px}
+.tag.ok{background:var(--color-ink-black); color:var(--color-linen-canvas)} /* 15,80:1 */
+.tag.mid{background:var(--color-paper-white); color:var(--color-stone); /* 8,49:1 sur blanc */
+  border:1px solid var(--filet-net)}
+.verb{margin-top:var(--spacing-16); border-top:1px solid var(--filet-doux); padding-top:var(--spacing-8)}
+.verb>summary{list-style:none; cursor:pointer; font-size:var(--text-caption);
   color:var(--color-stone); display:flex; align-items:center; gap:.4rem;
   transition:transform 140ms cubic-bezier(.23,1,.32,1)}
 .verb>summary::-webkit-details-marker{display:none}
@@ -107,92 +290,152 @@ details[open]>.fold-body,details[open]>.verbs,tr.det.show td>.verbs{
   transition:transform 160ms cubic-bezier(.23,1,.32,1)}
 .verb[open]>summary::before{transform:rotate(180deg)}
 .verb>summary:active{transform:scale(.98)}
-.verbs{background:var(--color-linen-canvas); border-radius:var(--radius); padding:var(--spacing-16);
-  margin-top:var(--spacing-8)}
-.quote{font-size:var(--text-body); line-height:1.5; color:var(--color-ink-black); margin:0 0 var(--spacing-16)}
+/* puits de verbatims : le lavis détache la citation du blanc de la carte sans
+   introduire de teinte. */
+.verbs{background:var(--color-wash); border-radius:var(--radius-champ);
+  padding:var(--spacing-16); margin-top:var(--spacing-8)}
+.quote{font-size:var(--text-body); line-height:1.5; color:var(--color-ink-black); /* 15,00:1 sur le lavis */
+  margin:0 0 var(--spacing-16); max-width:none}
 .verbs .quote:last-child{margin:0}
-.src{display:block; font-size:12px; color:var(--color-pebble); margin-top:2px}
+.src{display:block; font-size:var(--text-caption); color:var(--color-pebble); /* 4,73:1 sur le lavis */
+  margin-top:2px}
 
 .tools{display:flex; gap:var(--spacing-8); flex-wrap:wrap; margin-bottom:var(--spacing-16)}
-input[type=search]{font-family:var(--font-cosmosoracle); font-size:var(--text-body);
-  font-weight:var(--w-regular); color:var(--color-ink-black); background:var(--color-paper-white);
-  border:1px solid var(--ink-22); border-radius:var(--radius); padding:var(--spacing-16) var(--spacing-24);
-  height:48px; flex:1; min-width:220px}
-input[type=search]::placeholder{color:var(--color-stone)}
+input[type=search]{font-family:var(--font-arial); font-size:var(--text-body);
+  font-weight:var(--w-regular); letter-spacing:var(--tracking);
+  color:var(--color-ink-black); background:var(--color-paper-white);
+  border:1px solid var(--filet-net); border-radius:var(--radius-champ);
+  padding:var(--spacing-16) var(--spacing-24); height:48px; flex:1; min-width:220px}
+input[type=search]::placeholder{color:var(--color-pebble)} /* 5,20:1 sur blanc */
 
-/* ===== menu déroulant maison — remplace <select>, dont Safari ignore la police et le
+/* ===== menu déroulant maison, remplace <select>, dont Safari ignore la police et le
    radius sur la boîte fermée, quel que soit le reset d'appearance appliqué ===== */
 .dd{position:relative}
 .dd-btn{all:unset; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between;
-  gap:var(--spacing-8); font-family:var(--font-cosmosoracle); font-size:var(--text-body);
-  font-weight:var(--w-regular); color:var(--color-ink-black); background:var(--color-paper-white);
-  border:1px solid var(--ink-22); border-radius:var(--radius); padding:var(--spacing-16) var(--spacing-24);
-  height:48px; min-width:170px; cursor:pointer; transition:transform 140ms cubic-bezier(.23,1,.32,1)}
+  gap:var(--spacing-8); font-family:var(--font-arial); font-size:var(--text-body);
+  font-weight:var(--w-regular); letter-spacing:var(--tracking);
+  color:var(--color-ink-black); background:var(--color-paper-white);
+  border:1px solid var(--filet-net); border-radius:var(--radius-champ);
+  padding:var(--spacing-16) var(--spacing-24); height:48px; min-width:170px; cursor:pointer;
+  transition:transform 140ms cubic-bezier(.23,1,.32,1)}
 .dd-btn:active{transform:scale(.99)}
 .dd.open .dd-btn{border-color:var(--color-ink-black)}
-.dd-arrow{flex:none; font-size:11px; color:var(--color-pebble); transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.dd-arrow{flex:none; font-size:.7em; color:var(--color-pebble); transition:transform 160ms cubic-bezier(.23,1,.32,1)}
 .dd.open .dd-arrow{transform:rotate(180deg); color:var(--color-ink-black)}
 .dd-list{position:absolute; z-index:5; top:calc(100% + 6px); left:0; min-width:100%; margin:0; padding:6px;
-  list-style:none; background:var(--color-paper-white); border:1px solid var(--ink-22);
-  border-radius:var(--radius); opacity:0; transform:translateY(-4px); pointer-events:none;
+  list-style:none; background:var(--color-paper-white); border:1px solid var(--filet-net);
+  border-radius:var(--radius-champ); box-shadow:var(--ombre-carte);
+  opacity:0; transform:translateY(-4px); pointer-events:none;
   transition:opacity 140ms cubic-bezier(.23,1,.32,1), transform 140ms cubic-bezier(.23,1,.32,1)}
 .dd.open .dd-list{opacity:1; transform:translateY(0); pointer-events:auto}
-.dd-list li{display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:10px;
+.dd-list li{display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:var(--radius-bouton);
   font-size:var(--text-body); color:var(--color-ink-black); white-space:nowrap; cursor:pointer}
-.dd-list li:hover,.dd-list li:focus-visible{background:var(--color-linen-canvas); outline:none}
-.dd-list li[aria-selected=true]{font-weight:var(--w-medium)}
-.dd-list li b{width:8px; height:8px; border-radius:50%; flex:none; display:inline-block}
+.dd-list li:hover,.dd-list li:focus-visible{background:var(--color-wash); outline:none}
+/* option choisie : le beurre, surface « sélection » de Hearth, remplace le demi-gras */
+.dd-list li[aria-selected=true]{background:var(--color-soft-butter)}
+.dd-list li b{width:12px; height:12px; border-radius:50%; flex:none; display:inline-block}
 .dd-label{display:flex; align-items:baseline; gap:5px}
-.dd-cat{color:var(--color-ink-black); font-weight:var(--w-medium)}
-.dd-val{color:var(--color-stone)}
+.dd-cat{color:var(--color-ink-black)}   /* 16,48:1 sur blanc */
+.dd-val{color:var(--color-stone)}       /*  8,49:1 sur blanc, l'écart de couleur suffit à séparer les deux */
 .count{font-size:var(--text-caption); color:var(--color-pebble); margin-bottom:var(--spacing-8);
   font-variant-numeric:tabular-nums}
 
 table{width:100%; border-collapse:separate; border-spacing:0 var(--spacing-8)}
-th{text-align:left; font-weight:var(--w-medium); font-size:var(--text-caption); letter-spacing:0;
-  text-transform:uppercase; color:var(--color-pebble); border-bottom:1px solid var(--color-ink-black);
-  padding:0}
+/* en-têtes : capitales, interlettrage positif, couleur tertiaire et filet net
+   sous la ligne. Quatre signaux faibles qui remplacent le demi-gras. */
+th{text-align:left; font-weight:var(--w-regular); font-size:var(--text-caption); letter-spacing:.08em;
+  text-transform:uppercase; color:var(--color-pebble); /* 4,98:1 sur parchemin */
+  border-bottom:1px solid var(--color-ink-black); padding:0}
 th button{all:unset; cursor:pointer; display:flex; align-items:center; gap:.3rem; width:100%;
-  padding:8px var(--spacing-16) 10px; font:inherit; font-weight:var(--w-medium); color:inherit;
+  padding:8px var(--spacing-16) 10px; font:inherit; letter-spacing:inherit; color:inherit;
   transition:transform 140ms cubic-bezier(.23,1,.32,1)}
 th button:active{transform:scale(.98)}
 th.n button{justify-content:flex-end}
-th button::after{content:""; font-size:.7rem; color:var(--color-ink-black)}
+/* flèche de tri : ne s'affiche que sur la colonne active, c'est donc déjà
+   l'état actif d'un contrôle, pas une valeur. 3,21:1 sur parchemin.
+   Cas particulier : trier par la colonne Gravité met cette flèche juste
+   au-dessus des pastilles --grav-*. Formes différentes (flèche contre
+   rond) et ember plus vif qu'aucun --grav-*, donc pas de confusion, mais
+   c'est le seul endroit où les deux emplois se côtoient. */
+th button::after{content:""; font-size:.75em; color:var(--color-ember)}
 th[data-dir=asc] button::after{content:"↑"}
 th[data-dir=desc] button::after{content:"↓"}
-td{background:var(--color-paper-white); border-top:1px solid var(--ink-10);
-  border-bottom:1px solid var(--ink-10); padding:14px var(--spacing-16); font-size:var(--text-body);
+/* ligne du tableau : une carte blanche sur parchemin, donc filet chaud + ombre,
+   le remplissage seul ne la détacherait que de 1,04:1.
+   L'ombre est portée par la ligne, pas par la cellule : posée sur chaque td
+   elle dessine une couture verticale à chaque bord de colonne, parce que la
+   cellule suivante peint son ombre par-dessus le fond de la précédente.
+   Sur un moteur qui ignore box-shadow sur tr, il reste le filet, qui suffit. */
+td{background:var(--color-paper-white); border-top:1px solid var(--filet-doux);
+  border-bottom:1px solid var(--filet-doux);
+  padding:14px var(--spacing-16); font-size:var(--text-body);
   color:var(--color-ink-black); vertical-align:middle}
-td:first-child{border-left:1px solid var(--ink-10); border-radius:var(--radius) 0 0 var(--radius)}
-td:last-child{border-right:1px solid var(--ink-10); border-radius:0 var(--radius) var(--radius) 0}
+tr.row,tr.det.show{box-shadow:var(--ombre-carte)}
+/* Une ligne dépliée et ses verbatims forment UN bloc qui s'allonge, pas deux
+   blocs empilés. Donc : l'ombre est portée par le bas de l'ensemble, la ligne
+   ouverte n'en porte plus (sinon elle en projette une sur ses propres
+   verbatims), et son filet du bas s'efface pour ne pas refermer le haut du
+   bloc. Seuls les coins extérieurs sont arrondis, en haut de la ligne ouverte
+   et en bas de la ligne de détail. */
+tr.row.open{box-shadow:none}
+td:first-child{border-left:1px solid var(--filet-doux); border-radius:var(--radius-carte) 0 0 var(--radius-carte)}
+td:last-child{border-right:1px solid var(--filet-doux); border-radius:0 var(--radius-carte) var(--radius-carte) 0}
 td.n{text-align:right; font-variant-numeric:tabular-nums}
 tr.row{cursor:pointer}
 tr.row td{transition:background-color 120ms ease}
-@media (hover:hover) and (pointer:fine){tr.row:hover td{background:var(--color-linen-canvas)}}
-tr.row.open td{background:var(--color-linen-canvas)}
-tr.row.open td:first-child{border-radius:var(--radius) 0 0 0}
-tr.row.open td:last-child{border-radius:0 var(--radius) 0 0}
+@media (hover:hover) and (pointer:fine){tr.row:hover td{background:var(--color-wash)}}
+/* ligne ouverte : passage au lavis, même surface que la ligne de détail, et
+   filet du bas effacé. La couleur reste déclarée pour que la cellule garde son
+   pixel de bordure et que la hauteur de la ligne ne bouge pas à l'ouverture. */
+tr.row.open td{background:var(--color-wash); border-bottom-color:transparent}
+tr.row.open td:first-child{border-radius:var(--radius-carte) 0 0 0}
+tr.row.open td:last-child{border-radius:0 var(--radius-carte) 0 0}
 .name-cell{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-8)}
-.chev{flex:none; color:var(--color-pebble); font-size:.72rem; transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.chev{flex:none; color:var(--color-pebble); font-size:.72em; transition:transform 160ms cubic-bezier(.23,1,.32,1)}
 tr.row.open .chev{transform:rotate(180deg); color:var(--color-ink-black)}
-td.score{font-weight:var(--w-medium)}
-.sbar{display:block; margin-top:5px; height:2px; border-radius:2px; background:var(--ink-10)}
+/* score : le chiffre reste au corps du tableau, c'est la barre sous la valeur
+   qui porte la comparaison. Le demi-gras n'avait rien à ajouter. */
+td.score{font-variant-numeric:tabular-nums}
+.sbar{display:block; margin-top:5px; height:2px; border-radius:2px; background:var(--filet-doux)}
 .sbar i{display:block; height:100%; border-radius:2px; background:var(--color-ink-black)}
 tr.det{display:none}
 tr.det.show{display:table-row}
-tr.det td{background:var(--color-linen-canvas); border-top:none; border-bottom:1px solid var(--ink-10);
-  border-radius:0 0 var(--radius) var(--radius); padding:0 var(--spacing-16) var(--spacing-16)}
-tr.det td:first-child,tr.det td:last-child{border-radius:0 0 var(--radius) var(--radius)}
+tr.det td{background:var(--color-wash); border-top:none; border-bottom:1px solid var(--filet-doux);
+  border-radius:0 0 var(--radius-carte) var(--radius-carte);
+  padding:var(--spacing-8) var(--spacing-16) var(--spacing-16); position:relative}
+/* Le vrai responsable de la couture, invisible dans la feuille de style : le
+   tableau écarte ses lignes de 8px (border-spacing), y compris une ligne ouverte
+   de ses propres verbatims. Cet écart laisse voir le fond du tableau, donc le
+   parchemin, plus clair que le lavis. Les fonds calculés des deux moitiés sont
+   pourtant rigoureusement identiques : c'est cette bande de 8px, et elle seule,
+   que l'œil lisait comme un trait et comme une différence de clarté.
+   La ligne de détail la recouvre de sa propre couleur, filets latéraux compris,
+   et le bloc devient continu du haut de l'en-tête au bas de la dernière
+   citation. */
+tr.det.show td::before{content:""; position:absolute; bottom:100%; left:-1px; right:-1px;
+  height:var(--spacing-8); background:var(--color-wash);
+  border-left:1px solid var(--filet-doux); border-right:1px solid var(--filet-doux)}
+tr.det td:first-child,tr.det td:last-child{border-radius:0 0 var(--radius-carte) var(--radius-carte)}
+/* dans le tableau, la ligne dépliée est déjà sur le lavis : le puits n'a plus à
+   se redessiner, il redeviendrait une boîte dans une boîte */
+tr.det .verbs{background:none; padding:0; margin:0}
 .empty{padding:var(--spacing-24) var(--spacing-16); color:var(--color-pebble); font-size:var(--text-body)}
 
-details.fold{background:var(--color-paper-white); border-radius:var(--radius); margin-bottom:var(--spacing-8)}
+details.fold{background:var(--color-paper-white); border:1px solid var(--filet-doux);
+  border-radius:var(--radius-carte); box-shadow:var(--ombre-carte); margin-bottom:var(--spacing-8)}
+/* titre de repli : 24px contre 16px de corps de texte. L'écart de taille
+   remplace le demi-gras. */
 details.fold>summary{list-style:none; cursor:pointer; padding:var(--spacing-16) var(--spacing-24);
-  font-weight:var(--w-medium); font-size:var(--text-subheading); display:flex;
-  justify-content:space-between; align-items:center; color:var(--color-ink-black);
-  transition:transform 140ms cubic-bezier(.23,1,.32,1)}
+  font-size:var(--text-subheading); line-height:1.25; display:flex;
+  justify-content:space-between; align-items:center; gap:var(--spacing-16);
+  color:var(--color-ink-black); transition:transform 140ms cubic-bezier(.23,1,.32,1)}
 details.fold>summary::-webkit-details-marker{display:none}
-details.fold>summary::after{content:"+"; color:var(--color-pebble); font-weight:var(--w-regular); font-size:1.1em}
-details.fold[open]>summary{border-bottom:1px solid var(--ink-10)}
+/* marqueur d'ouverture du repli : état actif d'un contrôle générique, sans
+   rapport avec une donnée du scan. 3,34:1 sur le blanc de carte des replis
+   ordinaires, 3,21:1 sur le parchemin du repli légende (fond propre à
+   .legend) : les deux tiennent le plancher 3:1 d'un signe. */
+details.fold>summary::after{content:"+"; color:var(--color-ember); font-size:.8em}
+details.fold[open]>summary{border-bottom:1px solid var(--filet-doux)}
 details.fold[open]>summary::after{content:"–"}
 details.fold>summary:active{transform:scale(.995)}
 .fold-body{padding:var(--spacing-24); font-size:var(--text-body); color:var(--color-stone); max-width:64ch}
@@ -200,18 +443,29 @@ details.fold>summary:active{transform:scale(.995)}
 .fold-body p:last-child{margin:0}
 .fold-body ul{margin:0 0 var(--spacing-16); padding-left:1.1rem}
 .fold-body li{margin-bottom:var(--spacing-8); color:var(--color-stone)}
-.fold-body b{color:var(--color-ink-black); font-weight:var(--w-medium)}
+/* amorce de paragraphe : encre sur un corps en pierre, 16,48:1 contre 8,49:1.
+   L'écart de couleur est ce qui reste une fois le demi-gras retiré. */
+.fold-body b{color:var(--color-ink-black); font-weight:var(--w-regular)}
 .legend-note{font-size:var(--text-caption); color:var(--color-pebble)}
-/* légende : ligne d'ancrage sous le bloc pour qu'il ne flotte plus entre les sections */
-details.legend{background:var(--color-linen-canvas); margin-top:var(--spacing-24);
-  border-bottom:1px solid var(--ink-22)}
-details.legend>summary{font-size:var(--text-body); font-weight:var(--w-regular); color:var(--color-stone)}
+/* légende : bloc à plat sur le parchemin, sans ombre ni filet de carte, avec une
+   ligne d'ancrage sous le bloc pour qu'il ne flotte plus entre les sections */
+details.legend{background:var(--color-linen-canvas); border:0; box-shadow:none;
+  margin-top:var(--spacing-24); border-bottom:1px solid var(--filet-net)}
+details.legend>summary{font-size:var(--text-body); line-height:var(--leading-body); color:var(--color-stone)}
+details.legend[open]>summary{border-bottom:1px solid var(--filet-doux)}
 
-@media (max-width:800px){ .cards{grid-template-columns:1fr} }
+/* en colonne unique, l'alignement entre cartes n'a plus d'objet : la hauteur
+   réservée au titre ne ferait plus qu'un trou */
+@media (max-width:800px){ .cards{grid-template-columns:1fr} .card h3{min-height:0} }
 @media (max-width:700px){
   .wrap{padding:var(--spacing-48) var(--spacing-16) 120px}
-  h1{font-size:28px; letter-spacing:-1.1px}
-  h2{font-size:20px}
+  /* sous 700px, le logo ne tient plus à côté d'un h1 de la largeur de l'écran :
+     il repasse au-dessus, comme avant ce lot. column-reverse le fait sans
+     changer l'ordre du DOM (h1 d'abord), donc la lecture au clavier et au
+     lecteur d'écran reste marque puis logo. */
+  .head-row{flex-direction:column-reverse; align-items:flex-start; gap:var(--spacing-8)}
+  h1{font-size:var(--text-heading-sm); line-height:var(--leading-heading-sm)}
+  h2{font-size:var(--text-subheading); line-height:var(--leading-subheading)}
   .tools{flex-wrap:wrap}
   input[type=search]{min-width:100%}
   .dd{flex:1 1 140px}
@@ -223,38 +477,71 @@ details.legend>summary{font-size:var(--text-body); font-weight:var(--w-regular);
   tbody,tr.row{display:block}
   tr.det{display:none}
   tr.det.show{display:block}
-  tr.row{background:var(--color-paper-white); border:1px solid var(--ink-10);
-    border-radius:var(--radius); padding:var(--spacing-8) var(--spacing-16); margin-bottom:var(--spacing-8)}
-  tr.row.open{border-radius:var(--radius) var(--radius) 0 0; margin-bottom:0}
+  tr.row{background:var(--color-paper-white); border:1px solid var(--filet-doux);
+    border-radius:var(--radius-carte); box-shadow:var(--ombre-carte);
+    padding:var(--spacing-8) var(--spacing-16); margin-bottom:var(--spacing-8)}
+  /* même bloc continu en fiches : la fiche ouverte perd son ombre et son filet
+     du bas, la ligne de détail ferme l'ensemble */
+  tr.row.open{border-radius:var(--radius-carte) var(--radius-carte) 0 0; margin-bottom:0;
+    background:var(--color-wash); border-bottom-color:transparent}
   td{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-16);
-    background:none; border:none; padding:8px 0}
-  td:first-child,td:last-child{border-radius:0}
-  td[data-label]::before{content:attr(data-label); font-size:12px; color:var(--color-pebble)}
-  td:not([data-label]){padding-bottom:6px; border-bottom:1px solid var(--ink-10); margin-bottom:2px}
+    background:none; border:none; box-shadow:none; padding:8px 0}
+  tr.row.open td{background:none}
+  /* les filets et les coins de la vue tableau sont plus spécifiques que la
+     remise à zéro de td : il faut les annuler nommément, sinon un trait vertical
+     orphelin traverse la fiche empilée */
+  td:first-child,td:last-child{border:none; border-radius:0}
+  td[data-label]::before{content:attr(data-label); font-size:var(--text-caption); color:var(--color-pebble)}
+  td:not([data-label]){padding-bottom:6px; border-bottom:1px solid var(--filet-doux); margin-bottom:2px}
   .name-cell{width:100%}
+  /* en fiches, le tableau n'écarte plus ses lignes : il n'y a pas de bande à
+     combler, et le bandeau de raccord viendrait mordre sur le bas de la fiche */
+  tr.det.show td::before{display:none}
   tr.det{margin:0 0 var(--spacing-8)}
-  tr.det td{display:block; background:var(--color-linen-canvas);
-    border-radius:0 0 var(--radius) var(--radius); padding:var(--spacing-4) var(--spacing-16) var(--spacing-16)}
+  tr.det td{display:block; background:var(--color-wash);
+    border:1px solid var(--filet-doux); border-top:none;
+    box-shadow:var(--ombre-carte);
+    border-radius:0 0 var(--radius-carte) var(--radius-carte);
+    padding:var(--spacing-4) var(--spacing-16) var(--spacing-16)}
 }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div class="col">
+  <div class="head-row">
+    <h1>[MARQUE]</h1>
     <div class="brandmark">
       <span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       <span class="eyebrow">Scan avis</span>
     </div>
-    <h1>[MARQUE]</h1>
+  </div>
+
+  <div class="col">
     <div class="cadrage">
-      <span>Périmètre <b>[LANGUE / GÉO]</b></span>
-      <span>Fenêtre <b>12 derniers mois</b></span>
-      <span>Scan du <b>[JJ/MM/AAAA]</b></span>
-      <span>Avis exploitables <b>[N]</b></span>
-      <span>Sources <b>[LISTE]</b></span>
+      <span class="cadrage-item" aria-label="Scan du [JJ/MM/AAAA], fenêtre : 12 derniers mois">
+        <svg class="picto" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <rect x="1.75" y="2.75" width="12.5" height="11.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M1.75 6h12.5" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M4.5 1.5v2.5M11.5 1.5v2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          <circle cx="8" cy="10" r="1.1" fill="currentColor" stroke="none"/>
+        </svg>
+        <b aria-hidden="true">[JJ/MM/AAAA] • 12 derniers mois</b>
+      </span>
+      <span class="cadrage-item">
+        <svg class="picto" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <path d="M2 3.5h12v7H6.8L4 13v-2.5H2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M8 5.4l.6 1.3 1.4.2-1 1 .2 1.4L8 8.6l-1.2.7.2-1.4-1-1 1.4-.2z" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>Avis exploitables <b>[N]</b></span>
+      </span>
+      <span class="sources-pill" id="sources" role="group"></span>
     </div>
   </div>
+
+  <!-- MODE ALLÉGÉ : si aucun irritant n'atteint Probable, supprime les cartes,
+       le tableau et la légende. Le constat, les signaux faibles et la méthode
+       restent. Voir references/livrable-html.md. -->
 
   <h2>Les trois irritants qui pèsent le plus</h2>
   <div class="cards" id="cards"></div>
@@ -269,30 +556,8 @@ details.legend>summary{font-size:var(--text-body); font-weight:var(--w-regular);
   <h2>Tableau complet</h2>
   <div class="tools">
     <input type="search" id="q" placeholder="Rechercher un irritant ou un verbatim" aria-label="Rechercher">
-    <div class="dd" id="fg">
-      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false">
-        <span class="dd-label"><span class="dd-cat">Gravité</span><span class="dd-val">toutes</span></span>
-        <span class="dd-arrow">▾</span>
-      </button>
-      <ul class="dd-list" role="listbox" aria-label="Filtrer par gravité">
-        <li role="option" data-value="" data-label="toutes" aria-selected="true">Toutes</li>
-        <li role="option" data-value="4"><b style="background:var(--grav-4)"></b>Churn</li>
-        <li role="option" data-value="3"><b style="background:var(--grav-3)"></b>Confiance</li>
-        <li role="option" data-value="2"><b style="background:var(--grav-2)"></b>Friction</li>
-        <li role="option" data-value="1"><b style="background:var(--grav-1)"></b>Cosmétique</li>
-      </ul>
-    </div>
-    <div class="dd" id="ff">
-      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false">
-        <span class="dd-label"><span class="dd-cat">Fiabilité</span><span class="dd-val">toutes</span></span>
-        <span class="dd-arrow">▾</span>
-      </button>
-      <ul class="dd-list" role="listbox" aria-label="Filtrer par fiabilité">
-        <li role="option" data-value="" data-label="toutes" aria-selected="true">Toutes</li>
-        <li role="option" data-value="Confirmé">Confirmé</li>
-        <li role="option" data-value="Probable">Probable</li>
-      </ul>
-    </div>
+    <div class="dd" id="dd-grav"></div>
+    <div class="dd" id="dd-fiab"></div>
   </div>
   <div class="count" id="count"></div>
 
@@ -312,7 +577,7 @@ details.legend>summary{font-size:var(--text-body); font-weight:var(--w-regular);
     <div class="fold-body">
       <p><b>Fréquence.</b> Nombre d'avis distincts où l'irritant apparaît. Des avis publiés dans une
       même fenêtre courte avec des formulations proches comptent pour un seul.</p>
-      <p><b>Gravité.</b> 1 cosmétique, 2 friction, 3 perte de confiance, 4 churn explicite. La note
+      <p><b>Gravité.</b> 1 mineur, 2 friction, 3 perte de confiance, 4 churn explicite. La note
       s'appuie sur les signaux présents dans les verbatims : mention de résiliation, de passage à la
       concurrence, intensité du reproche.</p>
       <p><b>Score.</b> Fréquence multipliée par gravité. Il sert à comparer les irritants entre eux
@@ -352,7 +617,7 @@ details.legend>summary{font-size:var(--text-body); font-weight:var(--w-regular);
   <details class="fold">
     <summary>Méthode et limites</summary>
     <div class="fold-body">
-      <p>[Sources activées, sources écartées et pourquoi, nombre de passes par source, requêtes menées.]</p>
+      <p>[Périmètre retenu : langue et géographie. Puis : sources activées, sources écartées et pourquoi, nombre de passes par source, requêtes menées.]</p>
       <p>Les avis en ligne surreprésentent les extrêmes. Les chiffres de ce document ne sont pas des
       statistiques représentatives de la base utilisateurs : ils mesurent ce qui se dit, pas ce qui
       se vit. Un irritant très gênant mais silencieux n'apparaît pas ici.</p>
@@ -363,135 +628,241 @@ details.legend>summary{font-size:var(--text-body); font-weight:var(--w-regular);
 </div>
 
 <script>
-/* Remplir ce tableau, et rien d'autre côté données.
-   nom  : libellé complet, celui du tableau et des cartes
-   freq : nombre d'avis distincts
-   grav : 1 à 4
-   fiab : "Confirmé" ou "Probable"
-   v    : [fragment court, "Source, JJ/MM, @pseudo", url]
-   Le score est calculé, ne le saisis pas. L'ordre du tableau n'importe pas. */
-const D=[
- {nom:"[Irritant]",freq:0,grav:4,fiab:"Confirmé",
-  v:[["fragment court","Trustpilot, JJ/MM, @pseudo","#"],
-     ["fragment court","Reddit, JJ/MM, @pseudo","#"]]}
+/* ============================================================
+   Données. Remplir SOURCES et D, et rien d'autre côté données.
+
+   SOURCES : noms des plateformes activées, dans l'ordre d'affichage.
+             Les trois premières portent un favicon dans la bulle.
+             Noms reconnus : Trustpilot, Reddit, App Store, Google Play,
+             Google Reviews, LinkedIn, X, G2, Avis vérifiés.
+             Toute autre source retombe sur le globe générique.
+
+   D : un objet par irritant priorisé.
+       nom       libellé complet, celui du tableau et des cartes
+       freq      nombre d'avis distincts
+       grav      1 à 4
+       fiab      "Confirmé" ou "Probable"
+       verbatims [{fragment, source, url}]
+                 fragment : quelques mots, pas l'avis entier
+                 source   : "Trustpilot, 14/03, @pseudo"
+                 url      : permalien, ou page source à défaut
+
+   Le score est calculé, ne le saisis pas. L'ordre de D n'importe pas.
+   ============================================================ */
+const SOURCES = ["Trustpilot", "Reddit", "App Store"];
+
+const D = [
+  {nom:"[Irritant]", freq:0, grav:4, fiab:"Confirmé", verbatims:[
+    {fragment:"fragment court", source:"Trustpilot, JJ/MM, @pseudo", url:"https://"},
+    {fragment:"fragment court", source:"Reddit, JJ/MM, @pseudo", url:"https://"}
+  ]}
 ];
 
-D.forEach(d=>d.score=d.freq*d.grav);
-const GL={4:"churn",3:"confiance",2:"friction",1:"cosmétique"};
-const GC={4:"var(--grav-4)",3:"var(--grav-3)",2:"var(--grav-2)",1:"var(--grav-1)"};
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const byScore=[...D].sort((a,b)=>b.score-a.score);
-const SMAX=Math.max(...D.map(d=>d.score));
+/* ===== À partir d'ici, rien à modifier ===== */
 
-function gravTag(d){
-  return '<span class="grav"><b style="background:'+GC[d.grav]+'"></b><i>'+GL[d.grav]+'</i></span>';
+D.forEach(d => d.score = d.freq * d.grav);
+
+const GRAV_LABEL = {4:"churn", 3:"confiance", 2:"friction", 1:"mineur"};
+const GRAV_VAR = {4:"var(--grav-4)", 3:"var(--grav-3)", 2:"var(--grav-2)", 1:"var(--grav-1)"};
+const SMAX = Math.max(1, ...D.map(d => d.score));
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* N'expose un href que si l'URL est bien formée et en http(s) : les URLs de
+   verbatims viennent de sources tierces, jamais de confiance a priori. */
+function safeHref(url){
+  try{ const u = new URL(url); return (u.protocol==="http:"||u.protocol==="https:") ? url : null; }
+  catch{ return null; }
 }
+
+function gravTag(g){
+  return '<span class="grav"><b style="background:'+GRAV_VAR[g]+'"></b><i>'+GRAV_LABEL[g]+'</i></span>';
+}
+
 function verbs(d){
-  return '<div class="verbs">'+d.v.map(x=>'<p class="quote">« '+esc(x[0])+' »<span class="src">'+
-    esc(x[1])+' — <a href="'+esc(x[2])+'">voir la source</a></span></p>').join("")+'</div>';
+  return '<div class="verbs">' + d.verbatims.map(v => {
+    const h = safeHref(v.url);
+    return '<p class="quote">« '+esc(v.fragment)+' »<span class="src">'+esc(v.source)+
+      (h ? ' · <a href="'+esc(h)+'" target="_blank" rel="noopener noreferrer">voir la source</a>' : '')+
+      '</span></p>';
+  }).join("") + '</div>';
 }
 
-document.getElementById("cards").innerHTML=byScore.slice(0,3).map(d=>
-  '<div class="card">'+
-  '<div class="score-line"><b>'+d.score+'</b><span>score</span></div>'+
-  '<h3>'+esc(d.nom)+'</h3>'+
-  '<div class="meta-row">'+
-    '<span class="metric">Fréquence <b>'+d.freq+'</b></span>'+
-    '<span class="metrics-sep">·</span>'+
-    '<span class="metric">Gravité '+gravTag(d)+'</span></div>'+
-  '<div class="meta-row"><span class="tag '+(d.fiab==="Confirmé"?"ok":"mid")+'">'+esc(d.fiab)+'</span></div>'+
-  '<details class="verb"><summary>'+d.v.length+(d.v.length>1?" verbatims":" verbatim")+
-  '</summary>'+verbs(d)+'</details></div>').join("");
+/* ===== bulle sources =====
+   Favicons maison, embarqués : la page doit rester un document autonome,
+   capturable et partageable, donc aucune résolution de favicon distante.
+   Repli générique (globe) pour toute source hors de la table, comme un
+   onglet de navigateur dont le favicon ne charge pas. */
+const ICONS = {
+  trustpilot: '<path d="M12 2.5l3.1 6.9 7.5.7-5.7 5 1.8 7.4L12 18.5l-6.7 4 1.8-7.4-5.7-5 7.5-.7z" fill="currentColor"/>',
+  reddit: '<circle cx="12" cy="14" r="7" fill="currentColor"/><circle cx="7.3" cy="8.2" r="2" fill="currentColor"/><circle cx="16.7" cy="8.2" r="2" fill="currentColor"/><circle cx="9" cy="14" r="1.3" fill="var(--color-ink-black)"/><circle cx="15" cy="14" r="1.3" fill="var(--color-ink-black)"/>',
+  appstore: '<path d="M15.5 8.3c-.9 0-1.7.5-2.3.5s-1.5-.5-2.4-.5c-1.7 0-3.4 1.4-3.4 4 0 2.9 2 6.9 3.6 6.9.7 0 1-.5 2.1-.5s1.3.5 2.2.5c1.2 0 2.2-1.4 2.9-2.7-1.6-.9-2-3.2-.4-4.4-.7-1-1.8-1.6-2.3-1.6zM13.6 6.6c.5-.6.8-1.4.7-2.2-.7 0-1.5.5-2 1.1-.4.6-.8 1.4-.7 2.2.8.1 1.6-.4 2-1.1z" fill="currentColor"/>',
+  googleplay: '<path d="M6 3.5v17c0 .4.4.7.8.5l14-8.5c.3-.2.3-.7 0-.9l-14-8.6c-.4-.2-.8.1-.8.5z" fill="currentColor"/>',
+  google: '<path d="M12 4.5a7.5 7.5 0 100 15 7.2 7.2 0 007.4-7.7h-7v2.3h4.4c-.4 2-2 3.2-4 3.2A5 5 0 1112 7c1.3 0 2.5.5 3.4 1.3l1.8-1.8A7.5 7.5 0 0012 4.5z" fill="currentColor"/>',
+  linkedin: '<g fill="currentColor"><rect x="4.5" y="9.5" width="3" height="9" rx="0.6"/><circle cx="6" cy="5.8" r="1.8"/><path d="M11 9.5h3v1.3c.7-1 1.8-1.6 3.1-1.6 2.4 0 4 1.6 4 4.6v5.2h-3v-4.7c0-1.3-.6-2.2-1.8-2.2-1 0-1.6.7-1.9 1.4-.1.3-.1.6-.1 1v4.5h-3V9.5z"/></g>',
+  x: '<path d="M5 4l6.2 8.2L5.3 20H8l4.6-5.8L17 20h3l-6.5-8.6L18.7 4H16l-4.3 5.4L7.9 4H5z" fill="currentColor"/>',
+  g2: '<text x="12" y="16" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="currentColor">G2</text>',
+  avisverifies: '<path d="M12 3l7 3v5c0 5-3.2 8.5-7 10-3.8-1.5-7-5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 12.3l2 2 4-4.3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>',
+  inconnue: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M4 12h16" stroke="currentColor" stroke-width="1.1"/><path d="M12 4c2.6 2.2 2.6 13.8 0 16M12 4c-2.6 2.2-2.6 13.8 0 16" fill="none" stroke="currentColor" stroke-width="1.1"/>'
+};
+const ALIAS = {
+  "trustpilot":"trustpilot", "reddit":"reddit",
+  "app store":"appstore", "apple app store":"appstore", "appstore":"appstore",
+  "google play":"googleplay", "google play store":"googleplay",
+  "google":"google", "google reviews":"google", "google avis":"google",
+  "linkedin":"linkedin", "x":"x", "twitter":"x", "g2":"g2",
+  "avis verifies":"avisverifies"
+};
+const normSource = n => n.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();
 
-/* ---- menu déroulant maison : remplace <select>, entièrement sous notre style ---- */
-function setupDropdown(id){
-  const root=document.getElementById(id);
-  const btn=root.querySelector(".dd-btn"), val=btn.querySelector(".dd-val"),
-        list=root.querySelector(".dd-list"), items=[...list.querySelectorAll("li")];
-  let value="";
-  function close(){root.classList.remove("open"); btn.setAttribute("aria-expanded","false")}
-  function openList(){
-    document.querySelectorAll(".dd.open").forEach(o=>{if(o!==root)o.classList.remove("open")});
-    root.classList.add("open"); btn.setAttribute("aria-expanded","true");
-    (items.find(li=>li.dataset.value===value)||items[0]).focus();
+(function sourcesPill(){
+  const el = document.getElementById("sources");
+  const n = SOURCES.length;
+  el.setAttribute("aria-label", "Sources : " + SOURCES.join(", "));
+  el.innerHTML =
+    '<span class="sources-avatars" aria-hidden="true">' +
+    SOURCES.slice(0,3).map(s =>
+      '<span class="source-avatar"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      (ICONS[ALIAS[normSource(s)]] || ICONS.inconnue) + '</svg></span>').join("") +
+    '</span><span class="sources-count" aria-hidden="true">' + n + (n>1 ? " sources" : " source") + '</span>';
+})();
+
+/* ===== cartes du top 3 =====
+   Trois choses seulement : le titre, la ligne fréquence · gravité, le repli
+   des verbatims. Le score et la fiabilité restent au tableau, qui a ses
+   colonnes et sa légende pour les expliquer. */
+document.getElementById("cards").innerHTML =
+  [...D].sort((a,b) => b.score - a.score).slice(0,3).map(d => {
+    const n = d.verbatims.length;
+    return '<div class="card"><h3>'+esc(d.nom)+'</h3>'+
+      '<div class="meta-row">'+
+        '<span class="metric">Fréquence <b>'+d.freq+'</b></span>'+
+        '<span class="metrics-sep">·</span>'+
+        '<span class="metric">Gravité '+gravTag(d.grav)+'</span>'+
+      '</div>'+
+      '<details class="verb"><summary>'+n+(n>1?" verbatims":" verbatim")+'</summary>'+
+      verbs(d)+'</details></div>';
+  }).join("");
+
+/* ===== menu déroulant maison =====
+   Remplace <select>, dont Safari ignore la police et le radius sur la boîte
+   fermée quel que soit le reset d'appearance appliqué. Clavier complet :
+   flèches, Entrée, Espace, Échap. */
+function dropdown(id, category, options, onChange){
+  const root = document.getElementById(id);
+  let value = options[0].value;
+  root.innerHTML =
+    '<button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false">'+
+      '<span class="dd-label"><span class="dd-cat">'+esc(category)+'</span>'+
+      '<span class="dd-val"></span></span><span class="dd-arrow">▾</span></button>'+
+    '<ul class="dd-list" role="listbox" aria-label="Filtrer par '+esc(category.toLowerCase())+'">'+
+    options.map(o => '<li role="option" tabindex="-1" data-v="'+esc(o.value)+'" aria-selected="false">'+
+      (o.dot ? '<b style="background:'+o.dot+'"></b>' : '')+esc(o.label)+'</li>').join("")+'</ul>';
+
+  const btn = root.querySelector(".dd-btn"), val = root.querySelector(".dd-val"),
+        items = [...root.querySelectorAll("li")];
+
+  function paint(){
+    const o = options.find(x => x.value === value) || options[0];
+    val.textContent = o.dispLabel || o.label;
+    items.forEach(li => li.setAttribute("aria-selected", String(li.dataset.v === value)));
   }
-  function pick(li){
-    value=li.dataset.value;
-    items.forEach(i=>i.setAttribute("aria-selected",i===li?"true":"false"));
-    val.textContent=li.dataset.label||li.textContent.trim();
-    close(); btn.focus(); render();
+  function setOpen(on){
+    root.classList.toggle("open", on);
+    btn.setAttribute("aria-expanded", String(on));
+    if(on) (items.find(li => li.dataset.v === value) || items[0]).focus();
   }
-  btn.addEventListener("click",()=>root.classList.contains("open")?close():openList());
-  items.forEach((li,idx)=>{
-    li.tabIndex=-1;
-    li.addEventListener("click",()=>pick(li));
-    li.addEventListener("keydown",e=>{
-      if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(li)}
-      else if(e.key==="Escape"){close();btn.focus()}
-      else if(e.key==="ArrowDown"){e.preventDefault(); items[Math.min(idx+1,items.length-1)].focus()}
-      else if(e.key==="ArrowUp"){e.preventDefault(); items[Math.max(idx-1,0)].focus()}
+  function pick(v){ value = v; paint(); onChange(v); setOpen(false); btn.focus(); }
+
+  btn.addEventListener("click", e => { e.stopPropagation(); setOpen(!root.classList.contains("open")); });
+  items.forEach((li, i) => {
+    li.addEventListener("click", e => { e.stopPropagation(); pick(li.dataset.v); });
+    li.addEventListener("keydown", e => {
+      if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(li.dataset.v); }
+      else if(e.key === "Escape"){ setOpen(false); btn.focus(); }
+      else if(e.key === "ArrowDown"){ e.preventDefault(); items[Math.min(i+1, items.length-1)].focus(); }
+      else if(e.key === "ArrowUp"){ e.preventDefault(); items[Math.max(i-1, 0)].focus(); }
     });
   });
-  document.addEventListener("click",e=>{if(!root.contains(e.target))close()});
-  root.getValue=()=>value;
-  return root;
+  document.addEventListener("click", e => { if(!root.contains(e.target)) setOpen(false); });
+  paint();
 }
-const fg=setupDropdown("fg"), ff=setupDropdown("ff");
 
-const tb=document.getElementById("tb"),cnt=document.getElementById("count"),
-      q=document.getElementById("q");
-let key="score",dir="desc";
+/* ===== tableau ===== */
+const tb = document.getElementById("tb"), cnt = document.getElementById("count"),
+      q = document.getElementById("q");
+let gravFilter = "", fiabFilter = "", key = "score", dir = "desc";
+const open = new Set();
 
 function render(){
-  const t=q.value.trim().toLowerCase(),g=fg.getValue(),f=ff.getValue();
-  let rowsF=D.filter(d=>{
-    if(g&&String(d.grav)!==g)return false;
-    if(f&&d.fiab!==f)return false;
-    if(!t)return true;
-    return d.nom.toLowerCase().includes(t)||d.v.some(x=>(x[0]+" "+x[1]).toLowerCase().includes(t));
+  const t = q.value.trim().toLowerCase();
+  const rows = D.filter(d => {
+    if(gravFilter && String(d.grav) !== gravFilter) return false;
+    if(fiabFilter && d.fiab !== fiabFilter) return false;
+    if(!t) return true;
+    if(d.nom.toLowerCase().includes(t)) return true;
+    return d.verbatims.some(v => (v.fragment+" "+v.source).toLowerCase().includes(t));
+  }).sort((a,b) => {
+    const x = a[key], y = b[key];
+    const r = (typeof x === "string" && typeof y === "string") ? x.localeCompare(y,"fr") : x - y;
+    return dir === "asc" ? r : -r;
   });
-  rowsF.sort((a,b)=>{
-    const x=a[key],y=b[key];
-    const r=typeof x==="string"?x.localeCompare(y,"fr"):x-y;
-    return dir==="asc"?r:-r;
-  });
-  cnt.textContent=rowsF.length+(rowsF.length>1?" irritants affichés sur ":" irritant affiché sur ")+D.length;
-  if(!rowsF.length){
-    tb.innerHTML='<tr><td colspan="5" class="empty">Aucun irritant ne correspond à ces filtres.</td></tr>';
+
+  cnt.textContent = rows.length + (rows.length>1 ? " irritants affichés sur " : " irritant affiché sur ") + D.length;
+
+  if(!rows.length){
+    tb.innerHTML = '<tr><td colspan="5" class="empty">Aucun irritant ne correspond à ces filtres.</td></tr>';
     return;
   }
-  tb.innerHTML=rowsF.map((d,i)=>
-    '<tr class="row" data-i="'+i+'" tabindex="0" role="button" aria-expanded="false">'+
-    '<td><span class="name-cell">'+esc(d.nom)+'<span class="chev">▾</span></span></td>'+
-    '<td class="n" data-label="Fréquence">'+d.freq+'</td>'+
-    '<td data-label="Gravité">'+gravTag(d)+'</td>'+
-    '<td class="n score" data-label="Score"><span class="val">'+d.score+
-      '<span class="sbar"><i style="width:'+Math.round(d.score/SMAX*100)+'%"></i></span></span></td>'+
-    '<td data-label="Fiabilité"><span class="tag '+(d.fiab==="Confirmé"?"ok":"mid")+'">'+esc(d.fiab)+
-      '</span></td></tr>'+
-    '<tr class="det" data-d="'+i+'"><td colspan="5">'+verbs(d)+'</td></tr>').join("");
+  tb.innerHTML = rows.map(d => {
+    const on = open.has(d.nom);
+    return '<tr class="row'+(on?" open":"")+'" data-nom="'+esc(d.nom)+'" tabindex="0" role="button" aria-expanded="'+on+'">'+
+      '<td><span class="name-cell">'+esc(d.nom)+'<span class="chev">▾</span></span></td>'+
+      '<td class="n" data-label="Fréquence">'+d.freq+'</td>'+
+      '<td data-label="Gravité">'+gravTag(d.grav)+'</td>'+
+      '<td class="n score" data-label="Score"><span class="val">'+d.score+
+        '<span class="sbar"><i style="width:'+Math.round(d.score/SMAX*100)+'%"></i></span></span></td>'+
+      '<td data-label="Fiabilité"><span class="tag '+(d.fiab==="Confirmé"?"ok":"mid")+'">'+esc(d.fiab)+'</span></td>'+
+      '</tr><tr class="det'+(on?" show":"")+'"><td colspan="5">'+verbs(d)+'</td></tr>';
+  }).join("");
 }
+
 function toggle(r){
-  const d=tb.querySelector('tr.det[data-d="'+r.dataset.i+'"]');
-  const on=d.classList.toggle("show");
-  r.classList.toggle("open",on);
-  r.setAttribute("aria-expanded",on);
+  const nom = r.dataset.nom;
+  if(open.has(nom)) open.delete(nom); else open.add(nom);
+  render();
 }
-tb.addEventListener("click",e=>{const r=e.target.closest("tr.row");if(r)toggle(r)});
-tb.addEventListener("keydown",e=>{
-  const r=e.target.closest("tr.row");
-  if(r&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggle(r)}
+tb.addEventListener("click", e => { const r = e.target.closest("tr.row"); if(r) toggle(r); });
+tb.addEventListener("keydown", e => {
+  const r = e.target.closest("tr.row");
+  if(r && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); toggle(r); }
 });
-document.querySelectorAll("th[data-k]").forEach(th=>{
-  th.querySelector("button").addEventListener("click",()=>{
-    const k=th.dataset.k;
-    if(k===key){dir=dir==="asc"?"desc":"asc"}else{key=k;dir=k==="nom"?"asc":"desc"}
-    document.querySelectorAll("th[data-k]").forEach(o=>o.removeAttribute("data-dir"));
-    th.dataset.dir=dir;
+document.querySelectorAll("th[data-k]").forEach(th => {
+  th.querySelector("button").addEventListener("click", () => {
+    const k = th.dataset.k;
+    if(k === key){ dir = dir === "asc" ? "desc" : "asc"; }
+    else { key = k; dir = k === "nom" ? "asc" : "desc"; }
+    document.querySelectorAll("th[data-k]").forEach(o => o.removeAttribute("data-dir"));
+    th.dataset.dir = dir;
     render();
   });
 });
-q.addEventListener("input",render);
+q.addEventListener("input", render);
+
+dropdown("dd-grav", "Gravité", [
+  {value:"", label:"Toutes", dispLabel:"toutes"},
+  {value:"4", label:"Churn", dot:GRAV_VAR[4]},
+  {value:"3", label:"Confiance", dot:GRAV_VAR[3]},
+  {value:"2", label:"Friction", dot:GRAV_VAR[2]},
+  {value:"1", label:"Mineur", dot:GRAV_VAR[1]}
+], v => { gravFilter = v; render(); });
+
+dropdown("dd-fiab", "Fiabilité", [
+  {value:"", label:"Toutes", dispLabel:"toutes"},
+  {value:"Confirmé", label:"Confirmé"},
+  {value:"Probable", label:"Probable"}
+], v => { fiabFilter = v; render(); });
+
 render();
 </script>
 </body>
