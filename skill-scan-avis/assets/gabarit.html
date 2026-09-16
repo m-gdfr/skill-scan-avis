@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scan avis — [MARQUE]</title>
+<style>
+:root{
+  /* ===== Tokens Cosmos ===== */
+  --color-linen-canvas:#f7f5f3; --color-ink-black:#0d0d0d; --color-paper-white:#ffffff;
+  --color-stone:#6e6a69; --color-pebble:#9a9796;
+
+  /* Police : sans-serif demandée, remplace le serif cosmosOracle */
+  --font-cosmosoracle:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+
+  --text-caption:14px; --leading-caption:1.5;
+  --text-body:16px; --leading-body:1.5; --tracking-body:-0.18px;
+  --text-subheading:18px; --leading-subheading:1.29; --tracking-subheading:-0.2px;
+  --text-heading-sm:24px; --leading-heading-sm:1.2; --tracking-heading-sm:-0.48px;
+  --text-heading:33px; --leading-heading:1.1; --tracking-heading:-1.32px;
+  --text-heading-lg:38px; --leading-heading-lg:1.08; --tracking-heading-lg:-1.52px;
+  --text-display:58px; --leading-display:1.06; --tracking-display:-2.32px;
+
+  --w-350:350; --w-regular:400; --w-medium:500;
+
+  --spacing-4:4px; --spacing-8:8px; --spacing-16:16px; --spacing-20:20px; --spacing-24:24px;
+  --spacing-32:32px; --spacing-40:40px; --spacing-48:48px; --spacing-72:72px;
+
+  --page-max-width:1280px; --section-gap:80px; --card-padding:16px; --element-gap:24px;
+  --radius:16px;
+
+  --ink-10:rgba(13,13,13,.1); --ink-22:rgba(13,13,13,.22);
+
+  /* Seule couleur chromatique de la page, réservée à la gravité, pour la lisibilité —
+     dégradé rouge (4, churn) → rose sourd (1, cosmétique), tons volontairement sombres */
+  --grav-4:#7d2b34; --grav-3:#a5424a; --grav-2:#c06e73; --grav-1:#dba7ab;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--color-linen-canvas); color:var(--color-ink-black);
+  font-family:var(--font-cosmosoracle); font-weight:var(--w-regular);
+  font-size:var(--text-body); line-height:var(--leading-body); letter-spacing:var(--tracking-body)}
+.wrap{max-width:var(--page-max-width); margin:0 auto; padding:var(--spacing-72) var(--spacing-24) 140px}
+.col{max-width:720px}
+h1,h2,h3,p,ul{margin:0}
+a{color:var(--color-ink-black); text-decoration:none; border-bottom:1px solid var(--ink-22)}
+a:hover{border-bottom-color:var(--color-ink-black)}
+:focus-visible{outline:1.5px solid var(--color-ink-black); outline-offset:2px; border-radius:2px}
+
+.brandmark{display:flex; align-items:center; gap:10px; margin-bottom:var(--spacing-16)}
+.dots{display:grid; grid-template-columns:repeat(3,4px); grid-template-rows:repeat(3,4px); gap:2px}
+.dots i{width:4px; height:4px; border-radius:50%; background:var(--color-ink-black)}
+.dots i:nth-child(5){background:transparent}
+.eyebrow{font-size:15px; font-weight:var(--w-medium); letter-spacing:0; text-transform:uppercase;
+  color:var(--color-ink-black)}
+
+h1{font-size:var(--text-heading-lg); line-height:var(--leading-heading-lg);
+  letter-spacing:var(--tracking-heading-lg); font-weight:var(--w-350); max-width:20ch}
+h2{font-size:var(--text-heading-sm); line-height:var(--leading-heading-sm);
+  letter-spacing:var(--tracking-heading-sm); font-weight:var(--w-350); color:var(--color-ink-black);
+  margin:var(--section-gap) 0 var(--spacing-24)}
+p{max-width:66ch; margin:0 0 var(--spacing-16); color:var(--color-stone)}
+
+details[open]>.fold-body,details[open]>.verbs,tr.det.show td>.verbs{
+  animation:reveal 180ms cubic-bezier(.23,1,.32,1) both}
+@keyframes reveal{from{opacity:0; transform:translateY(-3px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:1ms!important; transition-duration:1ms!important}}
+
+.cadrage{display:flex; flex-wrap:wrap; gap:var(--spacing-4) var(--spacing-24);
+  margin-top:var(--spacing-16); font-size:var(--text-caption); letter-spacing:0; color:var(--color-pebble)}
+.cadrage b{color:var(--color-ink-black); font-weight:var(--w-medium); font-variant-numeric:tabular-nums}
+
+/* ===== constat — texte nu sur le canvas, plus de carte : trop répétitif à côté
+   des autres blocs déjà encartés ===== */
+.constat p{font-size:var(--text-subheading); line-height:var(--leading-subheading);
+  letter-spacing:var(--tracking-subheading); color:var(--color-stone); max-width:64ch}
+.constat p:last-child{margin:0}
+
+/* ===== top 3 ===== */
+.cards{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--element-gap)}
+.card{background:var(--color-paper-white); border-radius:var(--radius); padding:var(--card-padding);
+  display:flex; flex-direction:column}
+/* score : simple hiérarchie typographique, plus de bulle */
+.score-line{display:flex; align-items:baseline; gap:6px; margin-bottom:var(--spacing-8)}
+.score-line b{font-size:32px; font-weight:var(--w-medium); line-height:1; color:var(--color-ink-black);
+  font-variant-numeric:tabular-nums}
+.score-line span{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--color-pebble)}
+.card h3{font-size:var(--text-subheading); line-height:1.35; letter-spacing:var(--tracking-subheading);
+  font-weight:var(--w-regular); color:var(--color-ink-black)}
+.meta-row{display:flex; align-items:center; flex-wrap:wrap; gap:var(--spacing-8); margin-top:var(--spacing-16)}
+.metric{font-size:var(--text-caption); color:var(--color-stone); display:inline-flex; align-items:center; gap:6px}
+.metric b{font-weight:var(--w-medium); color:var(--color-ink-black); font-variant-numeric:tabular-nums}
+.metrics-sep{color:var(--color-pebble)}
+/* gravité : plus de chiffre, seulement le nom et la bulle colorée */
+.grav{display:inline-flex; align-items:center; gap:6px}
+.grav b{width:9px; height:9px; border-radius:50%; flex:none; display:inline-block}
+.grav i{font-style:normal; color:var(--color-ink-black); font-weight:var(--w-medium)}
+.tag{font-size:var(--text-caption); border-radius:var(--radius); padding:4px 12px}
+.tag.ok{background:var(--color-ink-black); color:var(--color-paper-white)}
+.tag.mid{background:var(--color-paper-white); color:var(--color-stone); border:1px solid var(--ink-22)}
+.verb{margin-top:var(--spacing-16); border-top:1px solid var(--ink-10); padding-top:var(--spacing-8)}
+.verb>summary{list-style:none; cursor:pointer; font-size:var(--text-caption); font-weight:var(--w-medium);
+  color:var(--color-stone); display:flex; align-items:center; gap:.4rem;
+  transition:transform 140ms cubic-bezier(.23,1,.32,1)}
+.verb>summary::-webkit-details-marker{display:none}
+.verb>summary::before{content:"▾"; font-size:.75em; color:var(--color-pebble);
+  transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.verb[open]>summary::before{transform:rotate(180deg)}
+.verb>summary:active{transform:scale(.98)}
+.verbs{background:var(--color-linen-canvas); border-radius:var(--radius); padding:var(--spacing-16);
+  margin-top:var(--spacing-8)}
+.quote{font-size:var(--text-body); line-height:1.5; color:var(--color-ink-black); margin:0 0 var(--spacing-16)}
+.verbs .quote:last-child{margin:0}
+.src{display:block; font-size:12px; color:var(--color-pebble); margin-top:2px}
+
+.tools{display:flex; gap:var(--spacing-8); flex-wrap:wrap; margin-bottom:var(--spacing-16)}
+input[type=search]{font-family:var(--font-cosmosoracle); font-size:var(--text-body);
+  font-weight:var(--w-regular); color:var(--color-ink-black); background:var(--color-paper-white);
+  border:1px solid var(--ink-22); border-radius:var(--radius); padding:var(--spacing-16) var(--spacing-24);
+  height:48px; flex:1; min-width:220px}
+input[type=search]::placeholder{color:var(--color-stone)}
+
+/* ===== menu déroulant maison — remplace <select>, dont Safari ignore la police et le
+   radius sur la boîte fermée, quel que soit le reset d'appearance appliqué ===== */
+.dd{position:relative}
+.dd-btn{all:unset; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between;
+  gap:var(--spacing-8); font-family:var(--font-cosmosoracle); font-size:var(--text-body);
+  font-weight:var(--w-regular); color:var(--color-ink-black); background:var(--color-paper-white);
+  border:1px solid var(--ink-22); border-radius:var(--radius); padding:var(--spacing-16) var(--spacing-24);
+  height:48px; min-width:170px; cursor:pointer; transition:transform 140ms cubic-bezier(.23,1,.32,1)}
+.dd-btn:active{transform:scale(.99)}
+.dd.open .dd-btn{border-color:var(--color-ink-black)}
+.dd-arrow{flex:none; font-size:11px; color:var(--color-pebble); transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.dd.open .dd-arrow{transform:rotate(180deg); color:var(--color-ink-black)}
+.dd-list{position:absolute; z-index:5; top:calc(100% + 6px); left:0; min-width:100%; margin:0; padding:6px;
+  list-style:none; background:var(--color-paper-white); border:1px solid var(--ink-22);
+  border-radius:var(--radius); opacity:0; transform:translateY(-4px); pointer-events:none;
+  transition:opacity 140ms cubic-bezier(.23,1,.32,1), transform 140ms cubic-bezier(.23,1,.32,1)}
+.dd.open .dd-list{opacity:1; transform:translateY(0); pointer-events:auto}
+.dd-list li{display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:10px;
+  font-size:var(--text-body); color:var(--color-ink-black); white-space:nowrap; cursor:pointer}
+.dd-list li:hover,.dd-list li:focus-visible{background:var(--color-linen-canvas); outline:none}
+.dd-list li[aria-selected=true]{font-weight:var(--w-medium)}
+.dd-list li b{width:8px; height:8px; border-radius:50%; flex:none; display:inline-block}
+.dd-label{display:flex; align-items:baseline; gap:5px}
+.dd-cat{color:var(--color-ink-black); font-weight:var(--w-medium)}
+.dd-val{color:var(--color-stone)}
+.count{font-size:var(--text-caption); color:var(--color-pebble); margin-bottom:var(--spacing-8);
+  font-variant-numeric:tabular-nums}
+
+table{width:100%; border-collapse:separate; border-spacing:0 var(--spacing-8)}
+th{text-align:left; font-weight:var(--w-medium); font-size:var(--text-caption); letter-spacing:0;
+  text-transform:uppercase; color:var(--color-pebble); border-bottom:1px solid var(--color-ink-black);
+  padding:0}
+th button{all:unset; cursor:pointer; display:flex; align-items:center; gap:.3rem; width:100%;
+  padding:8px var(--spacing-16) 10px; font:inherit; font-weight:var(--w-medium); color:inherit;
+  transition:transform 140ms cubic-bezier(.23,1,.32,1)}
+th button:active{transform:scale(.98)}
+th.n button{justify-content:flex-end}
+th button::after{content:""; font-size:.7rem; color:var(--color-ink-black)}
+th[data-dir=asc] button::after{content:"↑"}
+th[data-dir=desc] button::after{content:"↓"}
+td{background:var(--color-paper-white); border-top:1px solid var(--ink-10);
+  border-bottom:1px solid var(--ink-10); padding:14px var(--spacing-16); font-size:var(--text-body);
+  color:var(--color-ink-black); vertical-align:middle}
+td:first-child{border-left:1px solid var(--ink-10); border-radius:var(--radius) 0 0 var(--radius)}
+td:last-child{border-right:1px solid var(--ink-10); border-radius:0 var(--radius) var(--radius) 0}
+td.n{text-align:right; font-variant-numeric:tabular-nums}
+tr.row{cursor:pointer}
+tr.row td{transition:background-color 120ms ease}
+@media (hover:hover) and (pointer:fine){tr.row:hover td{background:var(--color-linen-canvas)}}
+tr.row.open td{background:var(--color-linen-canvas)}
+tr.row.open td:first-child{border-radius:var(--radius) 0 0 0}
+tr.row.open td:last-child{border-radius:0 var(--radius) 0 0}
+.name-cell{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-8)}
+.chev{flex:none; color:var(--color-pebble); font-size:.72rem; transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+tr.row.open .chev{transform:rotate(180deg); color:var(--color-ink-black)}
+td.score{font-weight:var(--w-medium)}
+.sbar{display:block; margin-top:5px; height:2px; border-radius:2px; background:var(--ink-10)}
+.sbar i{display:block; height:100%; border-radius:2px; background:var(--color-ink-black)}
+tr.det{display:none}
+tr.det.show{display:table-row}
+tr.det td{background:var(--color-linen-canvas); border-top:none; border-bottom:1px solid var(--ink-10);
+  border-radius:0 0 var(--radius) var(--radius); padding:0 var(--spacing-16) var(--spacing-16)}
+tr.det td:first-child,tr.det td:last-child{border-radius:0 0 var(--radius) var(--radius)}
+.empty{padding:var(--spacing-24) var(--spacing-16); color:var(--color-pebble); font-size:var(--text-body)}
+
+details.fold{background:var(--color-paper-white); border-radius:var(--radius); margin-bottom:var(--spacing-8)}
+details.fold>summary{list-style:none; cursor:pointer; padding:var(--spacing-16) var(--spacing-24);
+  font-weight:var(--w-medium); font-size:var(--text-subheading); display:flex;
+  justify-content:space-between; align-items:center; color:var(--color-ink-black);
+  transition:transform 140ms cubic-bezier(.23,1,.32,1)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:"+"; color:var(--color-pebble); font-weight:var(--w-regular); font-size:1.1em}
+details.fold[open]>summary{border-bottom:1px solid var(--ink-10)}
+details.fold[open]>summary::after{content:"–"}
+details.fold>summary:active{transform:scale(.995)}
+.fold-body{padding:var(--spacing-24); font-size:var(--text-body); color:var(--color-stone); max-width:64ch}
+.fold-body p{margin:0 0 var(--spacing-16); color:var(--color-stone)}
+.fold-body p:last-child{margin:0}
+.fold-body ul{margin:0 0 var(--spacing-16); padding-left:1.1rem}
+.fold-body li{margin-bottom:var(--spacing-8); color:var(--color-stone)}
+.fold-body b{color:var(--color-ink-black); font-weight:var(--w-medium)}
+.legend-note{font-size:var(--text-caption); color:var(--color-pebble)}
+/* légende : ligne d'ancrage sous le bloc pour qu'il ne flotte plus entre les sections */
+details.legend{background:var(--color-linen-canvas); margin-top:var(--spacing-24);
+  border-bottom:1px solid var(--ink-22)}
+details.legend>summary{font-size:var(--text-body); font-weight:var(--w-regular); color:var(--color-stone)}
+
+@media (max-width:800px){ .cards{grid-template-columns:1fr} }
+@media (max-width:700px){
+  .wrap{padding:var(--spacing-48) var(--spacing-16) 120px}
+  h1{font-size:28px; letter-spacing:-1.1px}
+  h2{font-size:20px}
+  .tools{flex-wrap:wrap}
+  input[type=search]{min-width:100%}
+  .dd{flex:1 1 140px}
+  .dd-btn{min-width:0; width:100%; padding-left:var(--spacing-16); padding-right:var(--spacing-16)}
+
+  /* tableau : lignes-fiches empilées avec étiquette de champ, plus de défilement latéral */
+  table{border-spacing:0}
+  thead{display:none}
+  tbody,tr.row{display:block}
+  tr.det{display:none}
+  tr.det.show{display:block}
+  tr.row{background:var(--color-paper-white); border:1px solid var(--ink-10);
+    border-radius:var(--radius); padding:var(--spacing-8) var(--spacing-16); margin-bottom:var(--spacing-8)}
+  tr.row.open{border-radius:var(--radius) var(--radius) 0 0; margin-bottom:0}
+  td{display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-16);
+    background:none; border:none; padding:8px 0}
+  td:first-child,td:last-child{border-radius:0}
+  td[data-label]::before{content:attr(data-label); font-size:12px; color:var(--color-pebble)}
+  td:not([data-label]){padding-bottom:6px; border-bottom:1px solid var(--ink-10); margin-bottom:2px}
+  .name-cell{width:100%}
+  tr.det{margin:0 0 var(--spacing-8)}
+  tr.det td{display:block; background:var(--color-linen-canvas);
+    border-radius:0 0 var(--radius) var(--radius); padding:var(--spacing-4) var(--spacing-16) var(--spacing-16)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="col">
+    <div class="brandmark">
+      <span class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span class="eyebrow">Scan avis</span>
+    </div>
+    <h1>[MARQUE]</h1>
+    <div class="cadrage">
+      <span>Périmètre <b>[LANGUE / GÉO]</b></span>
+      <span>Fenêtre <b>12 derniers mois</b></span>
+      <span>Scan du <b>[JJ/MM/AAAA]</b></span>
+      <span>Avis exploitables <b>[N]</b></span>
+      <span>Sources <b>[LISTE]</b></span>
+    </div>
+  </div>
+
+  <h2>Les trois irritants qui pèsent le plus</h2>
+  <div class="cards" id="cards"></div>
+
+  <h2>Ce qui ressort</h2>
+  <div class="constat">
+    <p>[Premier paragraphe : les irritants qui pèsent, et en quoi ils ne sont pas de même nature.]</p>
+    <p>[Second paragraphe : là où ils se concentrent dans le parcours, et ce qui au contraire ne
+    mobilise personne.]</p>
+  </div>
+
+  <h2>Tableau complet</h2>
+  <div class="tools">
+    <input type="search" id="q" placeholder="Rechercher un irritant ou un verbatim" aria-label="Rechercher">
+    <div class="dd" id="fg">
+      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false">
+        <span class="dd-label"><span class="dd-cat">Gravité</span><span class="dd-val">toutes</span></span>
+        <span class="dd-arrow">▾</span>
+      </button>
+      <ul class="dd-list" role="listbox" aria-label="Filtrer par gravité">
+        <li role="option" data-value="" data-label="toutes" aria-selected="true">Toutes</li>
+        <li role="option" data-value="4"><b style="background:var(--grav-4)"></b>Churn</li>
+        <li role="option" data-value="3"><b style="background:var(--grav-3)"></b>Confiance</li>
+        <li role="option" data-value="2"><b style="background:var(--grav-2)"></b>Friction</li>
+        <li role="option" data-value="1"><b style="background:var(--grav-1)"></b>Cosmétique</li>
+      </ul>
+    </div>
+    <div class="dd" id="ff">
+      <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false">
+        <span class="dd-label"><span class="dd-cat">Fiabilité</span><span class="dd-val">toutes</span></span>
+        <span class="dd-arrow">▾</span>
+      </button>
+      <ul class="dd-list" role="listbox" aria-label="Filtrer par fiabilité">
+        <li role="option" data-value="" data-label="toutes" aria-selected="true">Toutes</li>
+        <li role="option" data-value="Confirmé">Confirmé</li>
+        <li role="option" data-value="Probable">Probable</li>
+      </ul>
+    </div>
+  </div>
+  <div class="count" id="count"></div>
+
+  <table>
+    <thead><tr>
+      <th data-k="nom"><button type="button">Irritant</button></th>
+      <th class="n" data-k="freq"><button type="button">Fréq.</button></th>
+      <th data-k="grav"><button type="button">Gravité</button></th>
+      <th class="n" data-k="score" data-dir="desc"><button type="button">Score</button></th>
+      <th data-k="fiab"><button type="button">Fiabilité</button></th>
+    </tr></thead>
+    <tbody id="tb"></tbody>
+  </table>
+
+  <details class="fold legend">
+    <summary>Comment lire les colonnes</summary>
+    <div class="fold-body">
+      <p><b>Fréquence.</b> Nombre d'avis distincts où l'irritant apparaît. Des avis publiés dans une
+      même fenêtre courte avec des formulations proches comptent pour un seul.</p>
+      <p><b>Gravité.</b> 1 cosmétique, 2 friction, 3 perte de confiance, 4 churn explicite. La note
+      s'appuie sur les signaux présents dans les verbatims : mention de résiliation, de passage à la
+      concurrence, intensité du reproche.</p>
+      <p><b>Score.</b> Fréquence multipliée par gravité. Il sert à comparer les irritants entre eux
+      au sein de ce scan uniquement. Il dépend du volume collecté et n'est pas comparable d'un scan
+      à l'autre.</p>
+      <p><b>Fiabilité.</b> Confirmé : corroboré par une source primaire, ou par au moins 5 avis sur
+      au moins 2 sources. Probable : au moins 3 avis sur au moins 2 sources. En dessous, l'irritant
+      passe en signaux faibles et n'est pas priorisé.</p>
+    </div>
+  </details>
+
+  <h2>Le reste du scan</h2>
+  <details class="fold">
+    <summary>Besoins exprimés</summary>
+    <div class="fold-body">
+      <ul><li>[Demande explicite d'évolution.]</li><li>[…]</li></ul>
+      <p class="legend-note">Un besoin est une demande explicite d'évolution. Il ne se confond pas
+      avec un irritant : « le filtre ne marche pas » est un irritant, « il faudrait un filtre par
+      date » est un besoin.</p>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>Points forts à préserver</summary>
+    <div class="fold-body">
+      <ul><li>[Ce que les utilisateurs défendent.]</li><li>[…]</li></ul>
+      <p>[Ce qu'une correction ne doit pas casser.]</p>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>Signaux faibles</summary>
+    <div class="fold-body">
+      <ul><li>[Irritant sous le seuil de fiabilité, avec son volume.]</li><li>[…]</li></ul>
+      <p>Sous le seuil de fiabilité, donc hors tableau. C'est souvent là que se trouvent les
+      irritants émergents : à revérifier au prochain scan plutôt qu'à écarter.</p>
+    </div>
+  </details>
+  <details class="fold">
+    <summary>Méthode et limites</summary>
+    <div class="fold-body">
+      <p>[Sources activées, sources écartées et pourquoi, nombre de passes par source, requêtes menées.]</p>
+      <p>Les avis en ligne surreprésentent les extrêmes. Les chiffres de ce document ne sont pas des
+      statistiques représentatives de la base utilisateurs : ils mesurent ce qui se dit, pas ce qui
+      se vit. Un irritant très gênant mais silencieux n'apparaît pas ici.</p>
+      <p>[Ce que le scan ne dit pas.]</p>
+    </div>
+  </details>
+
+</div>
+
+<script>
+/* Remplir ce tableau, et rien d'autre côté données.
+   nom  : libellé complet, celui du tableau et des cartes
+   freq : nombre d'avis distincts
+   grav : 1 à 4
+   fiab : "Confirmé" ou "Probable"
+   v    : [fragment court, "Source, JJ/MM, @pseudo", url]
+   Le score est calculé, ne le saisis pas. L'ordre du tableau n'importe pas. */
+const D=[
+ {nom:"[Irritant]",freq:0,grav:4,fiab:"Confirmé",
+  v:[["fragment court","Trustpilot, JJ/MM, @pseudo","#"],
+     ["fragment court","Reddit, JJ/MM, @pseudo","#"]]}
+];
+
+D.forEach(d=>d.score=d.freq*d.grav);
+const GL={4:"churn",3:"confiance",2:"friction",1:"cosmétique"};
+const GC={4:"var(--grav-4)",3:"var(--grav-3)",2:"var(--grav-2)",1:"var(--grav-1)"};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const byScore=[...D].sort((a,b)=>b.score-a.score);
+const SMAX=Math.max(...D.map(d=>d.score));
+
+function gravTag(d){
+  return '<span class="grav"><b style="background:'+GC[d.grav]+'"></b><i>'+GL[d.grav]+'</i></span>';
+}
+function verbs(d){
+  return '<div class="verbs">'+d.v.map(x=>'<p class="quote">« '+esc(x[0])+' »<span class="src">'+
+    esc(x[1])+' — <a href="'+esc(x[2])+'">voir la source</a></span></p>').join("")+'</div>';
+}
+
+document.getElementById("cards").innerHTML=byScore.slice(0,3).map(d=>
+  '<div class="card">'+
+  '<div class="score-line"><b>'+d.score+'</b><span>score</span></div>'+
+  '<h3>'+esc(d.nom)+'</h3>'+
+  '<div class="meta-row">'+
+    '<span class="metric">Fréquence <b>'+d.freq+'</b></span>'+
+    '<span class="metrics-sep">·</span>'+
+    '<span class="metric">Gravité '+gravTag(d)+'</span></div>'+
+  '<div class="meta-row"><span class="tag '+(d.fiab==="Confirmé"?"ok":"mid")+'">'+esc(d.fiab)+'</span></div>'+
+  '<details class="verb"><summary>'+d.v.length+(d.v.length>1?" verbatims":" verbatim")+
+  '</summary>'+verbs(d)+'</details></div>').join("");
+
+/* ---- menu déroulant maison : remplace <select>, entièrement sous notre style ---- */
+function setupDropdown(id){
+  const root=document.getElementById(id);
+  const btn=root.querySelector(".dd-btn"), val=btn.querySelector(".dd-val"),
+        list=root.querySelector(".dd-list"), items=[...list.querySelectorAll("li")];
+  let value="";
+  function close(){root.classList.remove("open"); btn.setAttribute("aria-expanded","false")}
+  function openList(){
+    document.querySelectorAll(".dd.open").forEach(o=>{if(o!==root)o.classList.remove("open")});
+    root.classList.add("open"); btn.setAttribute("aria-expanded","true");
+    (items.find(li=>li.dataset.value===value)||items[0]).focus();
+  }
+  function pick(li){
+    value=li.dataset.value;
+    items.forEach(i=>i.setAttribute("aria-selected",i===li?"true":"false"));
+    val.textContent=li.dataset.label||li.textContent.trim();
+    close(); btn.focus(); render();
+  }
+  btn.addEventListener("click",()=>root.classList.contains("open")?close():openList());
+  items.forEach((li,idx)=>{
+    li.tabIndex=-1;
+    li.addEventListener("click",()=>pick(li));
+    li.addEventListener("keydown",e=>{
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(li)}
+      else if(e.key==="Escape"){close();btn.focus()}
+      else if(e.key==="ArrowDown"){e.preventDefault(); items[Math.min(idx+1,items.length-1)].focus()}
+      else if(e.key==="ArrowUp"){e.preventDefault(); items[Math.max(idx-1,0)].focus()}
+    });
+  });
+  document.addEventListener("click",e=>{if(!root.contains(e.target))close()});
+  root.getValue=()=>value;
+  return root;
+}
+const fg=setupDropdown("fg"), ff=setupDropdown("ff");
+
+const tb=document.getElementById("tb"),cnt=document.getElementById("count"),
+      q=document.getElementById("q");
+let key="score",dir="desc";
+
+function render(){
+  const t=q.value.trim().toLowerCase(),g=fg.getValue(),f=ff.getValue();
+  let rowsF=D.filter(d=>{
+    if(g&&String(d.grav)!==g)return false;
+    if(f&&d.fiab!==f)return false;
+    if(!t)return true;
+    return d.nom.toLowerCase().includes(t)||d.v.some(x=>(x[0]+" "+x[1]).toLowerCase().includes(t));
+  });
+  rowsF.sort((a,b)=>{
+    const x=a[key],y=b[key];
+    const r=typeof x==="string"?x.localeCompare(y,"fr"):x-y;
+    return dir==="asc"?r:-r;
+  });
+  cnt.textContent=rowsF.length+(rowsF.length>1?" irritants affichés sur ":" irritant affiché sur ")+D.length;
+  if(!rowsF.length){
+    tb.innerHTML='<tr><td colspan="5" class="empty">Aucun irritant ne correspond à ces filtres.</td></tr>';
+    return;
+  }
+  tb.innerHTML=rowsF.map((d,i)=>
+    '<tr class="row" data-i="'+i+'" tabindex="0" role="button" aria-expanded="false">'+
+    '<td><span class="name-cell">'+esc(d.nom)+'<span class="chev">▾</span></span></td>'+
+    '<td class="n" data-label="Fréquence">'+d.freq+'</td>'+
+    '<td data-label="Gravité">'+gravTag(d)+'</td>'+
+    '<td class="n score" data-label="Score"><span class="val">'+d.score+
+      '<span class="sbar"><i style="width:'+Math.round(d.score/SMAX*100)+'%"></i></span></span></td>'+
+    '<td data-label="Fiabilité"><span class="tag '+(d.fiab==="Confirmé"?"ok":"mid")+'">'+esc(d.fiab)+
+      '</span></td></tr>'+
+    '<tr class="det" data-d="'+i+'"><td colspan="5">'+verbs(d)+'</td></tr>').join("");
+}
+function toggle(r){
+  const d=tb.querySelector('tr.det[data-d="'+r.dataset.i+'"]');
+  const on=d.classList.toggle("show");
+  r.classList.toggle("open",on);
+  r.setAttribute("aria-expanded",on);
+}
+tb.addEventListener("click",e=>{const r=e.target.closest("tr.row");if(r)toggle(r)});
+tb.addEventListener("keydown",e=>{
+  const r=e.target.closest("tr.row");
+  if(r&&(e.key==="Enter"||e.key===" ")){e.preventDefault();toggle(r)}
+});
+document.querySelectorAll("th[data-k]").forEach(th=>{
+  th.querySelector("button").addEventListener("click",()=>{
+    const k=th.dataset.k;
+    if(k===key){dir=dir==="asc"?"desc":"asc"}else{key=k;dir=k==="nom"?"asc":"desc"}
+    document.querySelectorAll("th[data-k]").forEach(o=>o.removeAttribute("data-dir"));
+    th.dataset.dir=dir;
+    render();
+  });
+});
+q.addEventListener("input",render);
+render();
+</script>
+</body>
+</html>
